@@ -1,0 +1,26 @@
+{
+  "name": "proyek_grafkom",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivansusanto/Proyek_Grafkom.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ivansusanto/Proyek_Grafkom/issues"
+  },
+  "homepage": "https://github.com/ivansusanto/Proyek_Grafkom#readme",
+  "dependencies": {
+    "three": "^0.152.2"
+  },
+  "devDependencies": {
+    "vite": "^4.3.8"
+  }
+}
