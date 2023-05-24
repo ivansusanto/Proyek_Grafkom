@@ -8,7 +8,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-camera.position.set( 0, 50, -20 );
+camera.position.set( 0, 3, 15 );
 camera.lookAt( 0, 0, -20 );
 
 const loader = new GLTFLoader();
@@ -97,11 +97,19 @@ function animate(){
     const t = frameCount / numFrames;
 
     car.position.lerp(targetPositions[targetIndex], t);
+    camera.position.lerp({
+        x: targetPositions[targetIndex].x,
+        y: targetPositions[targetIndex].y + 1.5,
+        z: targetPositions[targetIndex].z
+    }, t);
   
     // Interpolate rotation
     car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
     car.rotation.y = THREE.MathUtils.lerp(car.rotation.y, targetRotations[targetIndex].y, t);
     car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
+    camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
+    camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
+    camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
     
     frameCount++;
     if (frameCount > numFrames) {
