@@ -93,8 +93,6 @@ function animate(){
     requestAnimationFrame( animate );
     // console.log( "Position : " + car.position.x + " , " + car.position.y + " , " + car.position.z);
     // console.log( "Rotation : " + car.rotation.x + " , " + car.rotation.y + " , " + car.rotation.z);
-    
-    console.log(targetIndex)
 
     const t = frameCount / numFrames;
 
@@ -106,15 +104,15 @@ function animate(){
     car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
     
     frameCount++;
-
     if (frameCount > numFrames) {
         frameCount = 0;
+        targetIndex++;
+        if (targetIndex >= targetPositions.length - 1) {
+            targetIndex = 0;
+        }
     }
-    
-    targetIndex++;
-    if (targetIndex >= targetPositions.length - 1) {
-        targetIndex = 0;
-    }
+
     renderer.render( scene, camera );
 }
+
 animate();
