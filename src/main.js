@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+//INIT===============================================
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
@@ -11,21 +12,32 @@ document.body.appendChild( renderer.domElement );
 camera.position.set( 0, 50, -20 );
 camera.lookAt( 0, 0, -20 );
 
+/////////////////////////////////////////////////////
+//OBJECTS============================================
+
 const loader = new GLTFLoader();
 
 let road, car;
 
+//ROAD=======================
 loader.load( '/road.glb', function ( gltf ) {
     road = gltf.scene;
 	scene.add( road );
 });
 
+//CAR========================
 loader.load( '/car.glb', function ( gltf ) {
     car = gltf.scene;
 	scene.add( car );
 });
 
+/////////////////////////////////////////////////////
+//BACKGROUND=========================================
+
 scene.background = new THREE.Color( 0xa0a0a0 );
+
+/////////////////////////////////////////////////////
+//LIGHT==============================================
 
 const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
 hemiLight.position.set( 0, 20, 0 );
@@ -42,6 +54,7 @@ dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add( dirLight );
 
+//OBJECT MOVE=========================================
 // Titik titik belok
 const curve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(-9, -0.15, 2.1),
@@ -88,9 +101,12 @@ for (let i = 0; i < targetPositions.length - 1; i++) {
 let frameCount = 0;
 let targetIndex = 0;
 
+////////////////////////////////////////////////////////////
+
 function animate(){
     requestAnimationFrame( animate );
 
+    //OBJECT ANIMATE==========================================================
     const t = frameCount;
 
     // Animasi Posisi Object
@@ -117,6 +133,8 @@ function animate(){
             targetIndex = 0;
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////
 
     renderer.render( scene, camera );
 }
