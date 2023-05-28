@@ -221,7 +221,7 @@ function teleportPlayerIfOob() {
 
 const loader = new GLTFLoader();
 
-let road, car;
+let road, car, krustykrab;
 
 //ROAD=======================
 loader.load( '/Road/road.glb', function ( gltf ) {
@@ -235,6 +235,15 @@ loader.load( '/Car/car.glb', function ( gltf ) {
     car = gltf.scene;
 	scene.add( car );
     worldOctree.fromGraphNode( car )
+});
+
+//KRUSTY KRAB================
+loader.load( '/KrustyKrab/KrustyKrab.glb', function ( gltf ) {
+    krustykrab = gltf.scene;
+    krustykrab.position.set(-20, 0, -10)
+	scene.add( krustykrab );
+    //JANGAN DINYALAIN :)))))))))))
+    // worldOctree.fromGraphNode( krustykrab )
 });
 
 //FLOOR======================
