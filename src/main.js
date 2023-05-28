@@ -48,7 +48,7 @@ const STEPS_PER_FRAME = 1;
 //MOVEMENTS=========================================
 const worldOctree = new Octree();
 
-const playerCollider = new Capsule( new THREE.Vector3( 0, 0.35, 0 ), new THREE.Vector3( 0, 1, 0 ), 0.35 );
+const playerCollider = new Capsule( new THREE.Vector3( 10, 0.5, 10 ), new THREE.Vector3( 10, 1, 10 ), 0.5 );
 
 const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
@@ -205,9 +205,9 @@ function teleportPlayerIfOob() {
 
     if ( camera.position.y <= - 25 ) {
 
-        playerCollider.start.set( 0, 0.35, 0 );
-        playerCollider.end.set( 0, 1, 0 );
-        playerCollider.radius = 0.35;
+        playerCollider.start.set( 10, 0.5, 10 );
+        playerCollider.end.set( 10, 1, 10 );
+        playerCollider.radius = 0.5;
         camera.position.copy( playerCollider.end );
         camera.rotation.set( 0, 0, 0 );
 
@@ -238,7 +238,7 @@ loader.load( '/Car/car.glb', function ( gltf ) {
 });
 
 //FLOOR======================
-const floorSize = 1000; // Size of the visible floor
+const floorSize = 100; // Size of the visible floor
 const tileSize = 10; // Size of each tile
 const numTiles = Math.ceil(floorSize / tileSize); // Number of tiles per side
 
