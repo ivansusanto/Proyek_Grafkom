@@ -111,7 +111,7 @@ function playerCollisions() {
 
         playerCollider.translate( result.normal.multiplyScalar( result.depth ) );
 
-        if (playerCollider.intersectsBox(carCapsule.collider)) {
+        if (playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
             // Collision with a rectangle detected
     
             // Calculate the direction vector from rectangle to player
@@ -132,12 +132,15 @@ function playerCollisions() {
 
 }
 
-function getPlayerDirection(carCapsule, playerCollider) {
-    const carCenter = carCapsule.getCenter(new THREE.Vector3());
+function getPlayerDirection(objectCollider, playerCollider) {
+    const carCenter = objectCollider.getCenter(new THREE.Vector3());
     const playerCenter = playerCollider.getCenter(new THREE.Vector3());
   
     return carCenter.sub(playerCenter).normalize();
 }
+
+let ridingCar = false;
+let ridingTimer = 0;
 
 function updatePlayer( deltaTime ) {
 
@@ -161,6 +164,44 @@ function updatePlayer( deltaTime ) {
 
     camera.position.copy( playerCollider.end );
 
+    if(ridingTimer != 0) {
+        ridingTimer++;
+        if(ridingTimer == 150){
+            ridingTimer = 0
+        }
+    }
+    console.log(playerCollider.end)
+    if(keyStates[ 'KeyF' ] && ridingCar && ridingTimer == 0){
+        playerCollider.start.set( 10, 0.8, 10 );
+        playerCollider.end.set( 10, 1.2, 10 );
+        // playerCollider.end.x = camera.position.x
+        // playerCollider.end.y = 1.2
+        // playerCollider.end.z = camera.position.x
+
+        ridingCar = false;
+        ridingTimer++;
+    }
+    else if(isPlayerAroundObject(carCapsule.collider, playerCollider) && keyStates[ 'KeyF' ] && !ridingCar && ridingTimer == 0) {
+        ridingCar = true;
+        ridingTimer++;
+    }
+    
+    if(ridingCar){
+        console.log("lul")
+    }
+    
+    // if(isPlayerAroundRectangle && keyStates[ 'KeyF' ] && ridingCar){
+    //     ridingCar = false;
+    // }
+}
+
+function isPlayerAroundObject(objectCollider, playerCollider) {
+    const playerPosition = playerCollider.getCenter(new THREE.Vector3());
+    const objectPosition = objectCollider.getCenter(new THREE.Vector3());
+  
+    const distance = playerPosition.distanceTo(objectPosition);
+    const proximityThreshold = 10; // Adjust this value to control the proximity threshold
+    return distance <= proximityThreshold;
 }
 
 function getForwardVector() {
@@ -273,8 +314,6 @@ loader.load( '/Car/car.glb', function ( gltf ) {
         collider: new THREE.Box3().setFromObject(car),
         velocity: new THREE.Vector3(),
     }
-
-    console.log(carCapsule)
 
 	scene.add( car );
     // worldOctree.fromGraphNode( car )
@@ -420,19 +459,27 @@ function animate(){
     // car.collider.center.copy(car.position)
     car.position.lerp(targetPositions[targetIndex], t);
     carCapsule.collider = new THREE.Box3().setFromObject(car)
-    // camera.position.lerp({
-    //     x: targetPositions[targetIndex].x,
-    //     y: targetPositions[targetIndex].y + 1.5,
-    //     z: targetPositions[targetIndex].z
-    // }, t);
-  
+    
     // Animasi Rotasi Object
     car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
     car.rotation.y = THREE.MathUtils.lerp(car.rotation.y, targetRotations[targetIndex].y, t);
     car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
-    // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
-    // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
-    // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
+
+    if(ridingCar){
+        // Animasi Posisi Camera
+        // camera.position.lerp({
+        //     x: targetPositions[targetIndex].x,
+        //     y: targetPositions[targetIndex].y + 1.5,
+        //     z: targetPositions[targetIndex].z
+        // }, t);
+        playerCollider.end.set(targetPositions[targetIndex].x, targetPositions[targetIndex].y + 1.5, targetPositions[targetIndex].z)
+
+
+        // Animasi Rotasi Camera
+        camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
+        camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
+        camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
+    }
     
     frameCount++;
     if (frameCount > 1) {
