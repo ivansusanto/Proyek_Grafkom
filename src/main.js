@@ -170,7 +170,7 @@ function updatePlayer( deltaTime ) {
             ridingTimer = 0
         }
     }
-    console.log(playerCollider.end)
+    
     if(keyStates[ 'KeyF' ] && ridingCar && ridingTimer == 0){
         playerCollider.start.set( 10, 0.8, 10 );
         playerCollider.end.set( 10, 1.2, 10 );
