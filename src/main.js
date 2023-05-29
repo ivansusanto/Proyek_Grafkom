@@ -281,7 +281,7 @@ loader.load( '/Car/car.glb', function ( gltf ) {
 });
 
 //KRUSTY KRAB================
-loader.load( '/KrustyKrab/KrustyKrab.glb', function ( gltf ) {
+loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
     krustykrab = gltf.scene;
     krustykrab.position.set(-20, 0, -10)
 	scene.add( krustykrab );
