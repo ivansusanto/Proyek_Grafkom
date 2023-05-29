@@ -48,7 +48,7 @@ const STEPS_PER_FRAME = 1;
 //MOVEMENTS=========================================
 const worldOctree = new Octree();
 
-const playerCollider = new Capsule( new THREE.Vector3( 10, 0.5, 10 ), new THREE.Vector3( 10, 1, 10 ), 0.5 );
+const playerCollider = new Capsule( new THREE.Vector3( 10, 0.8, 10 ), new THREE.Vector3( 10, 1.2, 10 ), 0.8 );
 
 const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
@@ -111,8 +111,32 @@ function playerCollisions() {
 
         playerCollider.translate( result.normal.multiplyScalar( result.depth ) );
 
+        if (playerCollider.intersectsBox(carCapsule.collider)) {
+            // Collision with a rectangle detected
+    
+            // Calculate the direction vector from rectangle to player
+            const direction = getPlayerDirection(carCapsule.collider, playerCollider);
+    
+            // Apply the throwing effect
+            const throwDistance = -15; // Adjust this value to control the throw distance
+            const throwHeight = 5; // Adjust this value to control the throw height
+            const throwVector = direction.clone().multiplyScalar(throwDistance);
+            throwVector.y += throwHeight;
+            playerVelocity.add(throwVector);
+    
+            // Additional feedback or actions for the player
+            console.log("Collision with a rectangle!");
+        }
+
     }
 
+}
+
+function getPlayerDirection(carCapsule, playerCollider) {
+    const carCenter = carCapsule.getCenter(new THREE.Vector3());
+    const playerCenter = playerCollider.getCenter(new THREE.Vector3());
+  
+    return carCenter.sub(playerCenter).normalize();
 }
 
 function updatePlayer( deltaTime ) {
@@ -205,9 +229,9 @@ function teleportPlayerIfOob() {
 
     if ( camera.position.y <= - 25 ) {
 
-        playerCollider.start.set( 10, 0.5, 10 );
-        playerCollider.end.set( 10, 1, 10 );
-        playerCollider.radius = 0.5;
+        playerCollider.start.set( 10, 0.8, 10 );
+        playerCollider.end.set( 10, 1.2, 10 );
+        playerCollider.radius = 0.8;
         camera.position.copy( playerCollider.end );
         camera.rotation.set( 0, 0, 0 );
 
@@ -222,6 +246,8 @@ function teleportPlayerIfOob() {
 const loader = new GLTFLoader();
 
 let road, car, krustykrab;
+let carCapsule;
+let rumahnpc = []
 
 //ROAD=======================
 loader.load( '/Road/road.glb', function ( gltf ) {
@@ -233,8 +259,25 @@ loader.load( '/Road/road.glb', function ( gltf ) {
 //CAR========================
 loader.load( '/Car/car.glb', function ( gltf ) {
     car = gltf.scene;
+    car.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    car.castShadow = true;
+    car.receiveShadow = true;
+    
+    carCapsule = {
+        mesh: car,
+        collider: new THREE.Box3().setFromObject(car),
+        velocity: new THREE.Vector3(),
+    }
+
+    console.log(carCapsule)
+
 	scene.add( car );
-    worldOctree.fromGraphNode( car )
+    // worldOctree.fromGraphNode( car )
 });
 
 //KRUSTY KRAB================
@@ -246,6 +289,32 @@ loader.load( '/KrustyKrab/KrustyKrab.glb', function ( gltf ) {
     // worldOctree.fromGraphNode( krustykrab )
 });
 
+//RUMAH=======================
+// for(let i = 0; i < 6; i++){
+//     loader.load( '/RumahNPC/rumahnpc.glb', function ( gltf ) {
+//         rumahnpc[i] = gltf.scene;
+//         rumahnpc[i].position.set(i, 0, 0)
+//         scene.add( rumahnpc[i] );
+//     });
+// }
+
+//BACKGROUND==========================
+
+// Create the background sphere geometry
+const backgroundGeometry = new THREE.SphereGeometry(500, 32, 32);
+
+// Load the background image texture
+const backgroundTextureLoader = new THREE.TextureLoader();
+const backgroundTexture = backgroundTextureLoader.load('/Background/BikiniBottom.jpeg');
+
+// Create a material with the background texture
+const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide });
+
+// Create a mesh with the geometry and material for the background
+const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+
+scene.add(backgroundMesh);
+
 //FLOOR======================
 const floorSize = 100; // Size of the visible floor
 const tileSize = 10; // Size of each tile
@@ -256,8 +325,8 @@ const floorGeometry = new THREE.PlaneGeometry(tileSize * numTiles, tileSize * nu
 const floorMaterial = new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false });
 
 // Apply a repeating texture to the floor material
-const textureLoader = new THREE.TextureLoader();
-const floorTexture = textureLoader.load('/Floor/Sand.png'); // Replace 'floor_texture.jpg' with the path to your desired floor texture
+const floorLoader = new THREE.TextureLoader();
+const floorTexture = floorLoader.load('/Floor/Sand.png'); // Replace 'floor_texture.jpg' with the path to your desired floor texture
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(numTiles, numTiles);
@@ -269,7 +338,6 @@ floorMesh.receiveShadow = true;
 scene.add(floorMesh);
 
 worldOctree.fromGraphNode( floorMesh )
-
 /////////////////////////////////////////////////////
 //BACKGROUND=========================================
 
@@ -349,7 +417,9 @@ function animate(){
     const t = frameCount;
 
     // Animasi Posisi Object
-    // car.position.lerp(targetPositions[targetIndex], t);
+    // car.collider.center.copy(car.position)
+    car.position.lerp(targetPositions[targetIndex], t);
+    carCapsule.collider = new THREE.Box3().setFromObject(car)
     // camera.position.lerp({
     //     x: targetPositions[targetIndex].x,
     //     y: targetPositions[targetIndex].y + 1.5,
@@ -357,9 +427,9 @@ function animate(){
     // }, t);
   
     // Animasi Rotasi Object
-    // car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
-    // car.rotation.y = THREE.MathUtils.lerp(car.rotation.y, targetRotations[targetIndex].y, t);
-    // car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
+    car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
+    car.rotation.y = THREE.MathUtils.lerp(car.rotation.y, targetRotations[targetIndex].y, t);
+    car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
     // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
     // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
     // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
@@ -389,8 +459,6 @@ function animate(){
         teleportPlayerIfOob();
 
     }
-
-    if(!playerOnFloor) console.log("lol")
 
     renderer.render( scene, camera );
 }
