@@ -162,21 +162,30 @@ function updatePlayer( deltaTime ) {
 
     playerCollisions();
 
-    camera.position.copy( playerCollider.end );
+    if(!ridingCar) camera.position.copy( playerCollider.end );
 
     if(ridingTimer != 0) {
         ridingTimer++;
-        if(ridingTimer == 150){
+        if(ridingTimer == 100){
             ridingTimer = 0
         }
     }
     
-    if(keyStates[ 'KeyF' ] && ridingCar && ridingTimer == 0){
-        playerCollider.start.set( 10, 0.8, 10 );
-        playerCollider.end.set( 10, 1.2, 10 );
-        // playerCollider.end.x = camera.position.x
+    if((keyStates[ 'KeyF' ] || keyStates[ 'Space' ]) && ridingCar && ridingTimer == 0){
+        // playerCollider.start.set( 10, 0.8, 10 );
+        // playerCollider.end.set( 10, 1.2, 10 );
+
+        // playerCollider.start.x = camera.position.x + 4
+        // playerCollider.start.y = 0.8
+        // playerCollider.start.z = camera.position.z
+
+        // playerCollider.end.x = camera.position.x + 4
         // playerCollider.end.y = 1.2
-        // playerCollider.end.z = camera.position.x
+        // playerCollider.end.z = camera.position.z
+
+        // playerCollider.radius = 0.8;
+
+        teleportPlayerToRightSide(car, 8)
 
         ridingCar = false;
         ridingTimer++;
@@ -195,12 +204,84 @@ function updatePlayer( deltaTime ) {
     // }
 }
 
+//TURUN MOBIL
+function teleportPlayerToRightSide(object, offset) {
+    // const objectPosition = objectCollider.getCenter(new THREE.Vector3());
+    // const objectSize = objectCollider.getSize(new THREE.Vector3());
+
+    // // Calculate the direction of the rectangle
+    // const objectDirection = objectPosition.clone().sub(previousObjectPosition).normalize();
+    // // previousObjectPosition = objectPosition.clone();
+  
+    // // Calculate the right side position based on the rectangle's direction
+    // const rightSidePosition = objectPosition.clone().addScaledVector(objectDirection, objectSize.x + playerCollider.radius);
+    // // console.log(objectPosition)
+    // // console.log(rightSidePosition)
+  
+    // // playerCollider.start.set(rightSidePosition);
+    // // playerCollider.end.set(rightSidePosition);
+    // // camera.position.copy(rightSidePosition);
+
+    // playerCollider.start.x = rightSidePosition.x
+    // playerCollider.start.y = 0.8
+    // playerCollider.start.z = rightSidePosition.z
+
+    // playerCollider.end.x = rightSidePosition.x
+    // playerCollider.end.y = 1.2
+    // playerCollider.end.z = rightSidePosition.z
+
+    // camera.position.copy(playerCollider.end);
+
+    // const objectPosition = object.position.clone();
+    // const objectSize = object.scale.clone();
+
+    // // Calculate the object's direction based on its rotation
+    // const objectDirection = new THREE.Vector3(1, 0, 1); // Assuming the object's initial direction is along the x-axis
+    // objectDirection.applyQuaternion(object.quaternion);
+
+    // // Calculate the right side position based on the object's direction, position, and size
+    // const rightSidePositionStart = new THREE.Vector3(
+    //     objectPosition.x + (objectSize.x * 0.5) + playerCollider.radius * objectDirection.x,
+    //     0.8,
+    //     objectPosition.z + (objectSize.z * 0.5) + playerCollider.radius * objectDirection.z
+    // );
+    // const rightSidePositionEnd = new THREE.Vector3(
+    //     objectPosition.x + (objectSize.x * 0.5) + playerCollider.radius * objectDirection.x,
+    //     1.2,
+    //     objectPosition.z + (objectSize.z * 0.5) + playerCollider.radius * objectDirection.z
+    // );
+
+    // // Update the start and end points of the playerCollider
+    // playerCollider.start.copy(rightSidePositionStart);
+    // playerCollider.end.copy(rightSidePositionEnd);
+
+    // // Update the camera position
+    // camera.position.copy(rightSidePositionEnd);
+
+    const objectPosition = new THREE.Vector3();
+    object.getWorldPosition(objectPosition);
+
+    // Get the right side position based on the object's position, rotation, size, and offset
+    const rightSidePosition = new THREE.Vector3();
+    object.getWorldDirection(rightSidePosition);
+    rightSidePosition.multiplyScalar(offset);
+    rightSidePosition.add(objectPosition);
+
+    // Update the player's position and collider to the right side position
+    playerCollider.start.copy(rightSidePosition);
+    playerCollider.start.y = 0.8; // Set the desired y-coordinate for playerCollider.start
+    playerCollider.end.copy(rightSidePosition);
+    playerCollider.end.y = 1.2; // Set the desired y-coordinate for playerCollider.end
+    camera.position.copy(rightSidePosition);
+}
+
+//CEK DEKET OBJECT
 function isPlayerAroundObject(objectCollider, playerCollider) {
     const playerPosition = playerCollider.getCenter(new THREE.Vector3());
     const objectPosition = objectCollider.getCenter(new THREE.Vector3());
   
     const distance = playerPosition.distanceTo(objectPosition);
-    const proximityThreshold = 10; // Adjust this value to control the proximity threshold
+    const proximityThreshold = 6; // Adjust this value to control the proximity threshold
     return distance <= proximityThreshold;
 }
 
@@ -286,7 +367,7 @@ function teleportPlayerIfOob() {
 
 const loader = new GLTFLoader();
 
-let road, car, krustykrab;
+let road, car, krustykrab, mrkrab;
 let carCapsule;
 let rumahnpc = []
 
@@ -319,23 +400,66 @@ loader.load( '/Car/car.glb', function ( gltf ) {
     // worldOctree.fromGraphNode( car )
 });
 
-//KRUSTY KRAB================
-loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
-    krustykrab = gltf.scene;
-    krustykrab.position.set(-20, 0, -10)
-	scene.add( krustykrab );
-    //JANGAN DINYALAIN :)))))))))))
-    // worldOctree.fromGraphNode( krustykrab )
+//MR KRAB=========================
+loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
+    mrkrab = gltf.scene;
+    mrkrab.scale.set(0.003, 0.003, 0.003)
+    mrkrab.position.set(5, 1, -8)
+    mrkrab.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    mrkrab.castShadow = true;
+    mrkrab.receiveShadow = true;
+
+	scene.add( mrkrab );
+    worldOctree.fromGraphNode( mrkrab )
 });
 
-//RUMAH=======================
-// for(let i = 0; i < 6; i++){
-//     loader.load( '/RumahNPC/rumahnpc.glb', function ( gltf ) {
-//         rumahnpc[i] = gltf.scene;
-//         rumahnpc[i].position.set(i, 0, 0)
-//         scene.add( rumahnpc[i] );
-//     });
-// }
+//KRUSTY KRAB================
+// loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
+//     krustykrab = gltf.scene;
+//     krustykrab.position.set(-20, 0, -10)
+// 	scene.add( krustykrab );
+//     //JANGAN DINYALAIN :)))))))))))
+//     // worldOctree.fromGraphNode( krustykrab )
+// });
+
+//RUMAH NPC=======================
+for(let i = 0; i < 5; i++){
+    loader.load( '/RumahNPC/rumahnpc.glb', function ( gltf ) {
+        rumahnpc[i] = gltf.scene;
+        if(i == 0){
+            rumahnpc[i].position.set(-10, 0, -7)
+        }
+        if(i == 1){
+            rumahnpc[i].position.set(20, 0, -13)
+            rumahnpc[i].rotation.set(0, -0.7, 0)
+        }
+        if(i == 2){
+            rumahnpc[i].position.set(37, 0, -10)
+        }
+        if(i == 3){
+            rumahnpc[i].position.set(54, 0, -25)
+        }
+        if(i == 4){
+            rumahnpc[i].position.set(40, 0, -35)
+            rumahnpc[i].rotation.set(0, 3, 0)
+        }
+        rumahnpc[i].traverse((node) => {
+            if (node.isMesh) {
+              node.castShadow = true;
+              node.receiveShadow = true;
+            }
+        });
+        rumahnpc[i].castShadow = true;
+        rumahnpc[i].receiveShadow = true;
+        scene.add( rumahnpc[i] );
+        // worldOctree.fromGraphNode( rumahnpc[i] )
+    });
+}
 
 //BACKGROUND==========================
 
@@ -355,7 +479,7 @@ const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
 scene.add(backgroundMesh);
 
 //FLOOR======================
-const floorSize = 100; // Size of the visible floor
+const floorSize = 500; // Size of the visible floor
 const tileSize = 10; // Size of each tile
 const numTiles = Math.ceil(floorSize / tileSize); // Number of tiles per side
 
@@ -399,6 +523,21 @@ dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.near = 0.1;
 dirLight.shadow.camera.far = 40;
 scene.add( dirLight );
+
+const dirLight2 = new THREE.DirectionalLight( 0xffffff );
+dirLight2.position.set( 20, 10, -5 );
+dirLight2.castShadow = true;
+dirLight2.shadow.camera.top = 2;
+dirLight2.shadow.camera.bottom = - 2;
+dirLight2.shadow.camera.left = - 2;
+dirLight2.shadow.camera.right = 2;
+// dirLight2.shadow.camera.near = 0.1;
+// dirLight2.shadow.camera.far = 40;
+dirLight2.shadow.camera.near = 0.1;
+dirLight2.shadow.camera.far = 1000;
+dirLight2.shadow.mapSize.width = 1024;
+dirLight2.shadow.mapSize.height = 1024;
+scene.add( dirLight2 );
 
 //OBJECT MOVE=========================================
 // Titik titik belok
@@ -467,18 +606,21 @@ function animate(){
 
     if(ridingCar){
         // Animasi Posisi Camera
-        // camera.position.lerp({
-        //     x: targetPositions[targetIndex].x,
-        //     y: targetPositions[targetIndex].y + 1.5,
-        //     z: targetPositions[targetIndex].z
-        // }, t);
-        playerCollider.end.set(targetPositions[targetIndex].x, targetPositions[targetIndex].y + 1.5, targetPositions[targetIndex].z)
-
-
+        camera.position.lerp({
+            x: targetPositions[targetIndex].x,
+            y: targetPositions[targetIndex].y + 1.5,
+            z: targetPositions[targetIndex].z
+        }, t);
+        // playerCollider.end.set(targetPositions[targetIndex].x, targetPositions[targetIndex].y + 1.5, targetPositions[targetIndex].z)
+        
         // Animasi Rotasi Camera
-        camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
-        camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
-        camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
+        // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
+        // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
+        // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
+
+        // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
+        // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
+        // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
     }
     
     frameCount++;
