@@ -26,7 +26,6 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 container.appendChild( renderer.domElement );
-console.log(renderer)
 
 ////////////////////////
 window.addEventListener( 'resize', onWindowResize );
@@ -376,10 +375,11 @@ let rumahnpc = []
 //ROAD=======================
 loader.load( '/Road/road.glb', function ( gltf ) {
     road = gltf.scene;
+    road.position.y = 0.0447
     road.traverse((node) => {
         if (node.isMesh) {
-          node.castShadow = true;
-          node.receiveShadow = true;
+            node.castShadow = true;
+            node.receiveShadow = true;
         }
     });
     road.castShadow = true;
@@ -414,7 +414,7 @@ loader.load( '/Car/car.glb', function ( gltf ) {
 loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
     mrkrab = gltf.scene;
     mrkrab.scale.set(0.003, 0.003, 0.003)
-    mrkrab.position.set(5, 1, -8)
+    mrkrab.position.set(5, 1.0447, -8)
     mrkrab.traverse((node) => {
         if (node.isMesh) {
           node.castShadow = true;
@@ -429,13 +429,21 @@ loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
 });
 
 //KRUSTY KRAB================
-// loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
-//     krustykrab = gltf.scene;
-//     krustykrab.position.set(-20, 0, -10)
-// 	scene.add( krustykrab );
-//     //JANGAN DINYALAIN :)))))))))))
-//     // worldOctree.fromGraphNode( krustykrab )
-// });
+loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
+    krustykrab = gltf.scene;
+    krustykrab.position.set(-20, 0, -10)
+    krustykrab.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    krustykrab.castShadow = true;
+    krustykrab.receiveShadow = true;
+	scene.add( krustykrab );
+    //JANGAN DINYALAIN :)))))))))))
+    // worldOctree.fromGraphNode( krustykrab )
+});
 
 //RUMAH NPC=======================
 for(let i = 0; i < 5; i++){
@@ -495,7 +503,7 @@ const numTiles = Math.ceil(floorSize / tileSize); // Number of tiles per side
 
 // Create a larger plane to tile the floor texture
 const floorGeometry = new THREE.PlaneGeometry(tileSize * numTiles, tileSize * numTiles, numTiles, numTiles);
-const floorMaterial = new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false });
+const floorMaterial = new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: true });
 
 // Apply a repeating texture to the floor material
 const floorLoader = new THREE.TextureLoader();
@@ -508,6 +516,7 @@ floorMaterial.map = floorTexture;
 const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 floorMesh.rotation.x = - Math.PI / 2;
 floorMesh.receiveShadow = true;
+floorMesh.castShadow = true;
 scene.add(floorMesh);
 
 worldOctree.fromGraphNode( floorMesh )
@@ -518,26 +527,18 @@ scene.background = new THREE.Color( 0xa0a0a0 );
 
 /////////////////////////////////////////////////////
 //LIGHT==============================================
-const geometry = new THREE.BoxGeometry( 0.2, 2, 5 );
-const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-const dinding1 = new THREE.Mesh( geometry, material );
-dinding1.position.x = 10
-dinding1.position.y = 1
-dinding1.castShadow = true
-dinding1.receiveShadow = true
-scene.add( dinding1 );
 
-const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
-hemiLight.position.set( 0, 20, 0 );
+const hemiLight = new THREE.HemisphereLight( 0xe5e5e5, 0x444444, 1 );
+hemiLight.position.set( 250, 250, 10 );
 scene.add( hemiLight );
 
+const hemiLight2 = new THREE.HemisphereLight( 0x87ceeb, 0x444444, 1 );
+hemiLight2.position.set( -250, 250, -10 );
+scene.add( hemiLight2 );
+
 const dirLight = new THREE.DirectionalLight( 0xffffff );
-dirLight.position.set( - 100, 50, - 10 );
+dirLight.position.set( -250, 250, -10 );
 dirLight.castShadow = true;
-// dirLight.shadow.camera.top = 2;
-// dirLight.shadow.camera.bottom = - 2;
-// dirLight.shadow.camera.left = - 2;
-// dirLight.shadow.camera.right = 2;
 dirLight.shadow.camera.left = -100;
 dirLight.shadow.camera.right = 100;
 dirLight.shadow.camera.top = 100;
@@ -547,6 +548,47 @@ dirLight.shadow.camera.far = 1000;
 dirLight.shadow.mapSize.width = 50000;
 dirLight.shadow.mapSize.height = 50000;
 scene.add( dirLight );
+
+function animateLight() {
+    // Menghitung sudut rotasi
+    var angle = Date.now() * 0.0001; // Nilai sudut berdasarkan waktu
+
+    // Mengatur posisi objek pada lingkaran dengan jari-jari 2
+    var radius = 250;
+    var x = Math.cos(angle) * radius;
+    var y = Math.sin(angle) * radius;
+
+    // Mengubah posisi objek
+    dirLight.position.x = x;
+    dirLight.position.y = y;
+    
+    hemiLight.position.x = x;
+    hemiLight.position.y = y;
+
+    hemiLight2.position.x = -x;
+    hemiLight2.position.y = y;
+
+    // Intensity cahaya
+    if(y < -25 && dirLight.intensity > 0.2){
+        dirLight.intensity -= 0.005
+        hemiLight.intensity -= 0.005
+        hemiLight2.intensity -= 0.005
+    }else if(y >= -25 && dirLight.intensity < 1){
+        dirLight.intensity += 0.005
+        hemiLight.intensity += 0.005
+        hemiLight2.intensity += 0.005
+    }
+    console.log(dirLight.intensity)
+    if(y >= 0){
+        console.log("diatas")
+    }
+    // Render scene
+    renderer.render(scene, camera);
+
+    // Next animation
+    requestAnimationFrame(animateLight);
+}
+animateLight();
 
 // const dirLight2 = new THREE.DirectionalLight( 0xffffff );
 // dirLight2.position.set( 20, 10, -5 );
