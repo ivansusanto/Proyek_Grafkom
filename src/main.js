@@ -22,9 +22,11 @@ const renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.VSMShadowMap;
+// renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 container.appendChild( renderer.domElement );
+console.log(renderer)
 
 ////////////////////////
 window.addEventListener( 'resize', onWindowResize );
@@ -374,6 +376,14 @@ let rumahnpc = []
 //ROAD=======================
 loader.load( '/Road/road.glb', function ( gltf ) {
     road = gltf.scene;
+    road.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    road.castShadow = true;
+    road.receiveShadow = true;
 	scene.add( road );
     worldOctree.fromGraphNode( road )
 });
@@ -508,36 +518,50 @@ scene.background = new THREE.Color( 0xa0a0a0 );
 
 /////////////////////////////////////////////////////
 //LIGHT==============================================
+const geometry = new THREE.BoxGeometry( 0.2, 2, 5 );
+const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+const dinding1 = new THREE.Mesh( geometry, material );
+dinding1.position.x = 10
+dinding1.position.y = 1
+dinding1.castShadow = true
+dinding1.receiveShadow = true
+scene.add( dinding1 );
 
 const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
 hemiLight.position.set( 0, 20, 0 );
 scene.add( hemiLight );
 
 const dirLight = new THREE.DirectionalLight( 0xffffff );
-dirLight.position.set( - 3, 10, - 10 );
+dirLight.position.set( - 100, 50, - 10 );
 dirLight.castShadow = true;
-dirLight.shadow.camera.top = 2;
-dirLight.shadow.camera.bottom = - 2;
-dirLight.shadow.camera.left = - 2;
-dirLight.shadow.camera.right = 2;
+// dirLight.shadow.camera.top = 2;
+// dirLight.shadow.camera.bottom = - 2;
+// dirLight.shadow.camera.left = - 2;
+// dirLight.shadow.camera.right = 2;
+dirLight.shadow.camera.left = -100;
+dirLight.shadow.camera.right = 100;
+dirLight.shadow.camera.top = 100;
+dirLight.shadow.camera.bottom = -100;
 dirLight.shadow.camera.near = 0.1;
-dirLight.shadow.camera.far = 40;
+dirLight.shadow.camera.far = 1000;
+dirLight.shadow.mapSize.width = 50000;
+dirLight.shadow.mapSize.height = 50000;
 scene.add( dirLight );
 
-const dirLight2 = new THREE.DirectionalLight( 0xffffff );
-dirLight2.position.set( 20, 10, -5 );
-dirLight2.castShadow = true;
-dirLight2.shadow.camera.top = 2;
-dirLight2.shadow.camera.bottom = - 2;
-dirLight2.shadow.camera.left = - 2;
-dirLight2.shadow.camera.right = 2;
+// const dirLight2 = new THREE.DirectionalLight( 0xffffff );
+// dirLight2.position.set( 20, 10, -5 );
+// dirLight2.castShadow = true;
+// dirLight2.shadow.camera.top = 2;
+// dirLight2.shadow.camera.bottom = - 2;
+// dirLight2.shadow.camera.left = - 2;
+// dirLight2.shadow.camera.right = 2;
+// // dirLight2.shadow.camera.near = 0.1;
+// // dirLight2.shadow.camera.far = 40;
 // dirLight2.shadow.camera.near = 0.1;
-// dirLight2.shadow.camera.far = 40;
-dirLight2.shadow.camera.near = 0.1;
-dirLight2.shadow.camera.far = 1000;
-dirLight2.shadow.mapSize.width = 1024;
-dirLight2.shadow.mapSize.height = 1024;
-scene.add( dirLight2 );
+// dirLight2.shadow.camera.far = 1000;
+// dirLight2.shadow.mapSize.width = 1024;
+// dirLight2.shadow.mapSize.height = 1024;
+// scene.add( dirLight2 );
 
 //OBJECT MOVE=========================================
 // Titik titik belok
