@@ -549,11 +549,12 @@ dirLight.shadow.mapSize.width = 50000;
 dirLight.shadow.mapSize.height = 50000;
 scene.add( dirLight );
 
+// Animation lampu biar jadi siang malem
 function animateLight() {
     // Menghitung sudut rotasi
     var angle = Date.now() * 0.0001; // Nilai sudut berdasarkan waktu
 
-    // Mengatur posisi objek pada lingkaran dengan jari-jari 2
+    // Mengatur posisi objek dengan jari jari
     var radius = 250;
     var x = Math.cos(angle) * radius;
     var y = Math.sin(angle) * radius;
