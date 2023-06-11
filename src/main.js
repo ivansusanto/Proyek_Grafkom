@@ -479,25 +479,8 @@ for(let i = 0; i < 5; i++){
     });
 }
 
-//BACKGROUND==========================
-
-// Create the background sphere geometry
-const backgroundGeometry = new THREE.SphereGeometry(500, 32, 32);
-
-// Load the background image texture
-const backgroundTextureLoader = new THREE.TextureLoader();
-const backgroundTexture = backgroundTextureLoader.load('/Background/BikiniBottom.jpeg');
-
-// Create a material with the background texture
-const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide });
-
-// Create a mesh with the geometry and material for the background
-const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-
-scene.add(backgroundMesh);
-
 //FLOOR======================
-const floorSize = 500; // Size of the visible floor
+const floorSize = 100; // Size of the visible floor
 const tileSize = 10; // Size of each tile
 const numTiles = Math.ceil(floorSize / tileSize); // Number of tiles per side
 
@@ -520,6 +503,24 @@ floorMesh.castShadow = true;
 scene.add(floorMesh);
 
 worldOctree.fromGraphNode( floorMesh )
+
+//BACKGROUND==========================
+
+// Create the background sphere geometry
+const backgroundGeometry = new THREE.SphereGeometry(500, 32, 32);
+
+// Load the background image texture
+const backgroundTextureLoader = new THREE.TextureLoader();
+const backgroundTexture = backgroundTextureLoader.load('/Background/BikiniBottom.jpeg');
+
+// Create a material with the background texture
+const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture, side: THREE.BackSide });
+
+// Create a mesh with the geometry and material for the background
+const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+
+scene.add(backgroundMesh);
+
 /////////////////////////////////////////////////////
 //BACKGROUND=========================================
 
@@ -528,26 +529,61 @@ scene.background = new THREE.Color( 0xa0a0a0 );
 /////////////////////////////////////////////////////
 //LIGHT==============================================
 
-const hemiLight = new THREE.HemisphereLight( 0xe5e5e5, 0x444444, 1 );
-hemiLight.position.set( 250, 250, 10 );
-scene.add( hemiLight );
+const hemiLightSiang = new THREE.HemisphereLight( 0xe5e5e5, 0x444444, 1 );
+hemiLightSiang.position.set( -250, 250, 10 );
+scene.add( hemiLightSiang );
 
-const hemiLight2 = new THREE.HemisphereLight( 0x87ceeb, 0x444444, 1 );
-hemiLight2.position.set( -250, 250, -10 );
-scene.add( hemiLight2 );
+const hemiLightSiang2 = new THREE.HemisphereLight( 0x87ceeb, 0x444444, 1 );
+hemiLightSiang2.position.set( 250, 250, -10 );
+scene.add( hemiLightSiang2 );
 
-const dirLight = new THREE.DirectionalLight( 0xffffff );
-dirLight.position.set( -250, 250, -10 );
-dirLight.castShadow = true;
-dirLight.shadow.camera.left = -100;
-dirLight.shadow.camera.right = 100;
-dirLight.shadow.camera.top = 100;
-dirLight.shadow.camera.bottom = -100;
-dirLight.shadow.camera.near = 0.1;
-dirLight.shadow.camera.far = 1000;
-dirLight.shadow.mapSize.width = 50000;
-dirLight.shadow.mapSize.height = 50000;
-scene.add( dirLight );
+const matahari = new THREE.DirectionalLight( 0xffffff );
+matahari.position.set( 250, 250, -10 );
+matahari.castShadow = true;
+matahari.shadow.camera.left = -50;
+matahari.shadow.camera.right = 50;
+matahari.shadow.camera.top = 50;
+matahari.shadow.camera.bottom = -50;
+matahari.shadow.camera.near = 0.1;
+matahari.shadow.camera.far = 1000;
+matahari.shadow.mapSize.width = 4096;
+matahari.shadow.mapSize.height = 4096;
+scene.add( matahari );
+
+const bulan = new THREE.DirectionalLight( 0xa5b3c7, 0.2 );
+bulan.position.set( -250, -250, -10 );
+bulan.castShadow = true;
+bulan.shadow.camera.left = -50;
+bulan.shadow.camera.right = 50;
+bulan.shadow.camera.top = 50;
+bulan.shadow.camera.bottom = -50;
+bulan.shadow.camera.near = 0.1;
+bulan.shadow.camera.far = 1000;
+bulan.shadow.mapSize.width = 4096;
+bulan.shadow.mapSize.height = 4096;
+scene.add( bulan );
+
+const hemiLightMalam = new THREE.HemisphereLight( 0x0c3b66, 0x444444, 0.6 );
+hemiLightMalam.position.set( -250, -250, 10 );
+scene.add( hemiLightMalam );
+
+const spotlight = new THREE.SpotLight(0xfcf49a, 0);
+spotlight.position.set(5, 10, -5); // Atur posisi lampu di atas objek yang ingin disorot
+spotlight.target.position.set(5, 0, -5); // Atur posisi target yang ingin disorot
+spotlight.castShadow = true; // Aktifkan pengelempokan bayangan pada spotlight
+spotlight.shadow.mapSize.width = 4096; // Ukuran bayangan lebar
+spotlight.shadow.mapSize.height = 4096; // Ukuran bayangan tinggi
+spotlight.shadow.camera.near = 0.1; // Jarak terdekat bayangan
+spotlight.shadow.camera.far = 50; // Jarak terjauh bayangan
+spotlight.shadow.camera.fov = 30; // Sudut pandang bayangan
+spotlight.angle = Math.PI / 7; //
+spotlight.penumbra = 0.5; // Intensitas penumbra cahaya
+scene.add(spotlight);
+scene.add(spotlight.target);
+
+const hemiLampu = new THREE.HemisphereLight( 0xfcf49a, 0x444444, 0 );
+hemiLampu.position.set( 5, 10, -5 );
+scene.add( hemiLampu );
 
 // Animation lampu biar jadi siang malem
 function animateLight() {
@@ -560,51 +596,62 @@ function animateLight() {
     var y = Math.sin(angle) * radius;
 
     // Mengubah posisi objek
-    dirLight.position.x = x;
-    dirLight.position.y = y;
+    //Siang
+    matahari.position.x = x;
+    matahari.position.y = y;
     
-    hemiLight.position.x = x;
-    hemiLight.position.y = y;
+    hemiLightSiang.position.x = x;
+    hemiLightSiang.position.y = y;
 
-    hemiLight2.position.x = -x;
-    hemiLight2.position.y = y;
+    hemiLightSiang2.position.x = -x;
+    hemiLightSiang2.position.y = y;
+
+    //Malem
+    bulan.position.x = -x;
+    bulan.position.y = -y;
+
+    hemiLightMalam.position.x = -x;
+    hemiLightMalam.position.y = -y;
 
     // Intensity cahaya
-    if(y < -25 && dirLight.intensity > 0.2){
-        dirLight.intensity -= 0.005
-        hemiLight.intensity -= 0.005
-        hemiLight2.intensity -= 0.005
-    }else if(y >= -25 && dirLight.intensity < 1){
-        dirLight.intensity += 0.005
-        hemiLight.intensity += 0.005
-        hemiLight2.intensity += 0.005
+    //Siang
+    if(y < -25 && matahari.intensity > 0.2){
+        matahari.intensity -= 0.005
+        hemiLightSiang.intensity -= 0.005
+        hemiLightSiang2.intensity -= 0.005
+    }else if(y >= -25 && matahari.intensity < 1){
+        matahari.intensity += 0.005
+        hemiLightSiang.intensity += 0.005
+        hemiLightSiang2.intensity += 0.005
     }
-    console.log(dirLight.intensity)
+    console.log(matahari.intensity)
     if(y >= 0){
-        console.log("diatas")
+        spotlight.intensity = 0
+        hemiLampu.intensity = 0
+    }else{
+        spotlight.intensity = 1
+        hemiLampu.intensity = 0.1
     }
-    // Render scene
-    renderer.render(scene, camera);
 
     // Next animation
     requestAnimationFrame(animateLight);
 }
 animateLight();
 
-// const dirLight2 = new THREE.DirectionalLight( 0xffffff );
-// dirLight2.position.set( 20, 10, -5 );
-// dirLight2.castShadow = true;
-// dirLight2.shadow.camera.top = 2;
-// dirLight2.shadow.camera.bottom = - 2;
-// dirLight2.shadow.camera.left = - 2;
-// dirLight2.shadow.camera.right = 2;
-// // dirLight2.shadow.camera.near = 0.1;
-// // dirLight2.shadow.camera.far = 40;
-// dirLight2.shadow.camera.near = 0.1;
-// dirLight2.shadow.camera.far = 1000;
-// dirLight2.shadow.mapSize.width = 1024;
-// dirLight2.shadow.mapSize.height = 1024;
-// scene.add( dirLight2 );
+// const matahari2 = new THREE.DirectionalLight( 0xffffff );
+// matahari2.position.set( 20, 10, -5 );
+// matahari2.castShadow = true;
+// matahari2.shadow.camera.top = 2;
+// matahari2.shadow.camera.bottom = - 2;
+// matahari2.shadow.camera.left = - 2;
+// matahari2.shadow.camera.right = 2;
+// // matahari2.shadow.camera.near = 0.1;
+// // matahari2.shadow.camera.far = 40;
+// matahari2.shadow.camera.near = 0.1;
+// matahari2.shadow.camera.far = 1000;
+// matahari2.shadow.mapSize.width = 4096;
+// matahari2.shadow.mapSize.height = 4096;
+// scene.add( matahari2 );
 
 //OBJECT MOVE=========================================
 // Titik titik belok
