@@ -48,6 +48,7 @@ const STEPS_PER_FRAME = 1;
 /////////////////////////////////////////////////////
 //MOVEMENTS=========================================
 const worldOctree = new Octree();
+let carOctree = new Octree();
 
 const playerCollider = new Capsule( new THREE.Vector3( 10, 0.8, 10 ), new THREE.Vector3( 10, 1.2, 10 ), 0.8 );
 
@@ -59,9 +60,9 @@ let mouseTime = 0;
 
 const keyStates = {};
 
-const vector1 = new THREE.Vector3();
-const vector2 = new THREE.Vector3();
-const vector3 = new THREE.Vector3();
+// const vector1 = new THREE.Vector3();
+// const vector2 = new THREE.Vector3();
+// const vector3 = new THREE.Vector3();
 
 document.addEventListener( 'keydown', ( event ) => {
 
@@ -87,8 +88,8 @@ document.body.addEventListener( 'mousemove', ( event ) => {
 
     if ( document.pointerLockElement === document.body ) {
 
-        camera.rotation.y -= event.movementX / 500;
-        camera.rotation.x -= event.movementY / 500;
+        camera.rotation.y -= event.movementX / 1000;
+        camera.rotation.x -= event.movementY / 1000;
 
     }
 
@@ -97,6 +98,7 @@ document.body.addEventListener( 'mousemove', ( event ) => {
 function playerCollisions() {
 
     const result = worldOctree.capsuleIntersect( playerCollider );
+    const result2 = carOctree.capsuleIntersect( playerCollider );
 
     playerOnFloor = false;
 
@@ -112,22 +114,45 @@ function playerCollisions() {
 
         playerCollider.translate( result.normal.multiplyScalar( result.depth ) );
 
-        if (playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
-            // Collision with a rectangle detected
+        // if (playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
+        //     // Collision with a rectangle detected
     
-            // Calculate the direction vector from rectangle to player
-            const direction = getPlayerDirection(carCapsule.collider, playerCollider);
+        //     // Calculate the direction vector from rectangle to player
+        //     const direction = getPlayerDirection(carCapsule.collider, playerCollider);
     
-            // Apply the throwing effect
-            const throwDistance = -15; // Adjust this value to control the throw distance
-            const throwHeight = 5; // Adjust this value to control the throw height
-            const throwVector = direction.clone().multiplyScalar(throwDistance);
-            throwVector.y += throwHeight;
-            playerVelocity.add(throwVector);
+        //     // Apply the throwing effect
+        //     const throwDistance = -15; // Adjust this value to control the throw distance
+        //     const throwHeight = 5; // Adjust this value to control the throw height
+        //     const throwVector = direction.clone().multiplyScalar(throwDistance);
+        //     throwVector.y += throwHeight;
+        //     playerVelocity.add(throwVector);
     
-            // Additional feedback or actions for the player
-            console.log("Collision with a rectangle!");
-        }
+        //     // Additional feedback or actions for the player
+        //     console.log("Collision with a rectangle!");
+        // }
+
+    }
+
+    if ( result2 ) {
+
+        playerCollider.translate( result2.normal.multiplyScalar( result2.depth ) );
+
+        // if (playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
+        //     // Collision with a rectangle detected
+    
+        //     // Calculate the direction vector from rectangle to player
+        //     const direction = getPlayerDirection(carCapsule.collider, playerCollider);
+    
+        //     // Apply the throwing effect
+        //     const throwDistance = -15; // Adjust this value to control the throw distance
+        //     const throwHeight = 5; // Adjust this value to control the throw height
+        //     const throwVector = direction.clone().multiplyScalar(throwDistance);
+        //     throwVector.y += throwHeight;
+        //     playerVelocity.add(throwVector);
+    
+        //     // Additional feedback or actions for the player
+        //     console.log("Collision with a rectangle!");
+        // }
 
     }
 
@@ -186,19 +211,22 @@ function updatePlayer( deltaTime ) {
 
         // playerCollider.radius = 0.8;
 
-        teleportPlayerToRightSide(car, 8)
+        teleportPlayerToRightSide(car, 1)
+
+        carOctree = new Octree();
+        carOctree.fromGraphNode(car);
 
         ridingCar = false;
         ridingTimer++;
     }
-    else if(isPlayerAroundObject(carCapsule.collider, playerCollider) && keyStates[ 'KeyF' ] && !ridingCar && ridingTimer == 0) {
+    else if(carCapsule && carCapsule.collider && isPlayerAroundObject(carCapsule.collider, playerCollider) && keyStates[ 'KeyF' ] && !ridingCar && ridingTimer == 0) {
         ridingCar = true;
         ridingTimer++;
     }
     
-    if(ridingCar){
-        console.log("lul")
-    }
+    // if(ridingCar){
+    //     console.log("lul")
+    // }
     
     // if(isPlayerAroundRectangle && keyStates[ 'KeyF' ] && ridingCar){
     //     ridingCar = false;
@@ -371,6 +399,7 @@ const loader = new GLTFLoader();
 let road, car, krustykrab, mrkrab;
 let carCapsule;
 let rumahnpc = []
+let tebing = []
 
 //ROAD=======================
 loader.load( '/Road/road.glb', function ( gltf ) {
@@ -378,7 +407,7 @@ loader.load( '/Road/road.glb', function ( gltf ) {
     road.position.y = 0.0447
     road.traverse((node) => {
         if (node.isMesh) {
-            node.castShadow = true;
+            node.castShadow = false;
             node.receiveShadow = true;
         }
     });
@@ -399,7 +428,10 @@ loader.load( '/Car/car.glb', function ( gltf ) {
     });
     car.castShadow = true;
     car.receiveShadow = true;
-    
+
+    car.position.set(-9, 0.1, 2.1);
+    car.rotation.set(0, 2, 0);
+
     carCapsule = {
         mesh: car,
         collider: new THREE.Box3().setFromObject(car),
@@ -407,8 +439,9 @@ loader.load( '/Car/car.glb', function ( gltf ) {
     }
 
 	scene.add( car );
-    // worldOctree.fromGraphNode( car )
+    carOctree.fromGraphNode( car )
 });
+
 
 //MR KRAB=========================
 loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
@@ -475,12 +508,58 @@ for(let i = 0; i < 5; i++){
         rumahnpc[i].castShadow = true;
         rumahnpc[i].receiveShadow = true;
         scene.add( rumahnpc[i] );
-        // worldOctree.fromGraphNode( rumahnpc[i] )
+        worldOctree.fromGraphNode( rumahnpc[i] )
+    });
+}
+
+//TEBING TEBING APA YANG BISA MOTONG POHON (TEBI(A)NG POHON)=======================
+for(let i = 0; i < 5; i++){
+    loader.load( '/Tebing/tebing.glb', function ( gltf ) {
+        // tebing[i] = gltf.scene;
+        // if(i == 0){
+        //     tebing[i].position.set(-10, 0, -7)
+        // }
+        // if(i == 1){
+        //     tebing[i].position.set(20, 0, -13)
+        //     tebing[i].rotation.set(0, -0.7, 0)
+        // }
+        // if(i == 2){
+        //     tebing[i].position.set(37, 0, -10)
+        // }
+        // if(i == 3){
+        //     tebing[i].position.set(54, 0, -25)
+        // }
+        // if(i == 4){
+        //     tebing[i].position.set(40, 0, -35)
+        //     tebing[i].rotation.set(0, 3, 0)
+        // }
+        // tebing[i].traverse((node) => {
+        //     if (node.isMesh) {
+        //       node.castShadow = true;
+        //       node.receiveShadow = true;
+        //     }
+        // });
+        // tebing[i].castShadow = true;
+        // tebing[i].receiveShadow = true;
+        // scene.add( tebing[i] );
+        // worldOctree.fromGraphNode( tebing[i] )
+        tebing = gltf.scene;
+        tebing.position.set(1000, 0, -200)
+        tebing.traverse((node) => {
+            if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+            }
+        });
+        tebing.castShadow = true;
+        tebing.receiveShadow = true;
+        // scene.add( tebing );
+        // worldOctree.fromGraphNode( tebing )
     });
 }
 
 //FLOOR======================
-const floorSize = 100; // Size of the visible floor
+const floorSize = 200; // Size of the visible floor
 const tileSize = 10; // Size of each tile
 const numTiles = Math.ceil(floorSize / tileSize); // Number of tiles per side
 
@@ -524,7 +603,7 @@ scene.add(backgroundMesh);
 /////////////////////////////////////////////////////
 //BACKGROUND=========================================
 
-scene.background = new THREE.Color( 0xa0a0a0 );
+// scene.background = new THREE.Color( 0xa0a0a0 );
 
 /////////////////////////////////////////////////////
 //LIGHT==============================================
@@ -540,10 +619,10 @@ scene.add( hemiLightSiang2 );
 const matahari = new THREE.DirectionalLight( 0xffffff );
 matahari.position.set( 250, 250, -10 );
 matahari.castShadow = true;
-matahari.shadow.camera.left = -50;
-matahari.shadow.camera.right = 50;
-matahari.shadow.camera.top = 50;
-matahari.shadow.camera.bottom = -50;
+matahari.shadow.camera.left = -100;
+matahari.shadow.camera.right = 100;
+matahari.shadow.camera.top = 100;
+matahari.shadow.camera.bottom = -100;
 matahari.shadow.camera.near = 0.1;
 matahari.shadow.camera.far = 1000;
 matahari.shadow.mapSize.width = 4096;
@@ -553,10 +632,10 @@ scene.add( matahari );
 const bulan = new THREE.DirectionalLight( 0xa5b3c7, 0.2 );
 bulan.position.set( -250, -250, -10 );
 bulan.castShadow = true;
-bulan.shadow.camera.left = -50;
-bulan.shadow.camera.right = 50;
-bulan.shadow.camera.top = 50;
-bulan.shadow.camera.bottom = -50;
+bulan.shadow.camera.left = -100;
+bulan.shadow.camera.right = 100;
+bulan.shadow.camera.top = 100;
+bulan.shadow.camera.bottom = -100;
 bulan.shadow.camera.near = 0.1;
 bulan.shadow.camera.far = 1000;
 bulan.shadow.mapSize.width = 4096;
@@ -624,13 +703,29 @@ function animateLight() {
         hemiLightSiang.intensity += 0.005
         hemiLightSiang2.intensity += 0.005
     }
-    console.log(matahari.intensity)
+    // console.log(matahari.intensity)
     if(y >= 0){
         spotlight.intensity = 0
         hemiLampu.intensity = 0
+        if (road) {
+            road.traverse((node) => {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                }
+            });
+        }
     }else{
         spotlight.intensity = 1
         hemiLampu.intensity = 0.1
+        if (road) {
+            road.traverse((node) => {
+                if (node.isMesh) {
+                    node.castShadow = false;
+                    node.receiveShadow = true;
+                }
+            });
+        }
     }
 
     // Next animation
@@ -656,39 +751,39 @@ animateLight();
 //OBJECT MOVE=========================================
 // Titik titik belok
 const curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-9, -0.15, 2.1),
-    new THREE.Vector3(3, -0.15, -4),
-    new THREE.Vector3(13, -0.15, -5.3),
-    new THREE.Vector3(22.5, -0.15, -0.9),
-    new THREE.Vector3(33, -0.15, 3.5),
-    new THREE.Vector3(39, -0.15, -2.2),
-    new THREE.Vector3(44, -0.15, -7.2),
-    new THREE.Vector3(50, -0.15, -12),
-    new THREE.Vector3(55, -0.15, -15.5),
-    new THREE.Vector3(59, -0.15, -20),
-    new THREE.Vector3(62, -0.15, -28),
-    new THREE.Vector3(61, -0.15, -34),
-    new THREE.Vector3(54, -0.15, -39),
-    new THREE.Vector3(40, -0.15, -42.7),
-    new THREE.Vector3(20, -0.15, -44.2),
-    new THREE.Vector3(0, -0.15, -45.3),
-    new THREE.Vector3(-20, -0.15, -46.3),
-    new THREE.Vector3(-31, -0.15, -46.5),
-    new THREE.Vector3(-38, -0.15, -46.6),
-    new THREE.Vector3(-43, -0.15, -45),
-    new THREE.Vector3(-47, -0.15, -40),
-    new THREE.Vector3(-49, -0.15, -27),
-    new THREE.Vector3(-48, -0.15, -15),
-    new THREE.Vector3(-42, -0.15, -5),
-    new THREE.Vector3(-36, -0.15, 0),
-    new THREE.Vector3(-29.5, -0.15, 5),
-    new THREE.Vector3(-23, -0.15, 7.3),
-    new THREE.Vector3(-19, -0.15, 7),
-    new THREE.Vector3(-9, -0.15, 2.1),
+    new THREE.Vector3(-9, 0.1, 2.1),
+    new THREE.Vector3(3, 0.1, -4),
+    new THREE.Vector3(13, 0.1, -5.3),
+    new THREE.Vector3(22.5, 0.1, -0.9),
+    new THREE.Vector3(33, 0.1, 3.5),
+    new THREE.Vector3(39, 0.1, -2.2),
+    new THREE.Vector3(44, 0.1, -7.2),
+    new THREE.Vector3(50, 0.1, -12),
+    new THREE.Vector3(55, 0.1, -15.5),
+    new THREE.Vector3(59, 0.1, -20),
+    new THREE.Vector3(62, 0.1, -28),
+    new THREE.Vector3(61, 0.1, -34),
+    new THREE.Vector3(54, 0.1, -39),
+    new THREE.Vector3(40, 0.1, -42.7),
+    new THREE.Vector3(20, 0.1, -44.2),
+    new THREE.Vector3(0, 0.1, -45.3),
+    new THREE.Vector3(-20, 0.1, -46.3),
+    new THREE.Vector3(-31, 0.1, -46.5),
+    new THREE.Vector3(-38, 0.1, -46.6),
+    new THREE.Vector3(-43, 0.1, -45),
+    new THREE.Vector3(-47, 0.1, -40),
+    new THREE.Vector3(-49, 0.1, -27),
+    new THREE.Vector3(-48, 0.1, -15),
+    new THREE.Vector3(-42, 0.1, -5),
+    new THREE.Vector3(-36, 0.1, 0),
+    new THREE.Vector3(-29.5, 0.1, 5),
+    new THREE.Vector3(-23, 0.1, 7.3),
+    new THREE.Vector3(-19, 0.1, 7),
+    new THREE.Vector3(-9, 0.1, 2.1)
 ]);
 
 // Array isinya x, y, z posisi track
-const targetPositions = curve.getPoints(700);
+const targetPositions = curve.getPoints(1000);
 
 const targetRotations = [];
 for (let i = 0; i < targetPositions.length - 1; i++) {
@@ -707,18 +802,18 @@ function animate(){
 
     //OBJECT ANIMATE==========================================================
     const t = frameCount;
-
-    // Animasi Posisi Object
-    // car.collider.center.copy(car.position)
-    car.position.lerp(targetPositions[targetIndex], t);
-    carCapsule.collider = new THREE.Box3().setFromObject(car)
     
-    // Animasi Rotasi Object
-    car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
-    car.rotation.y = THREE.MathUtils.lerp(car.rotation.y, targetRotations[targetIndex].y, t);
-    car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
-
     if(ridingCar){
+        // Animasi Posisi Object
+        // car.collider.center.copy(car.position)
+        car.position.lerp(targetPositions[targetIndex], t);
+        carCapsule.collider = new THREE.Box3().setFromObject(car)
+        
+        // Animasi Rotasi Object
+        car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
+        car.rotation.y = THREE.MathUtils.lerp(car.rotation.y, targetRotations[targetIndex].y, t);
+        car.rotation.z = THREE.MathUtils.lerp(car.rotation.z, targetRotations[targetIndex].z, t);
+
         // Animasi Posisi Camera
         camera.position.lerp({
             x: targetPositions[targetIndex].x,
@@ -735,16 +830,16 @@ function animate(){
         // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
         // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
         // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
-    }
-    
-    frameCount++;
-    if (frameCount > 1) {
-        frameCount = 0;
-        targetIndex++;
-        if (targetIndex >= targetPositions.length - 1) {
-            targetIndex = 0;
+        frameCount++;
+        if (frameCount > 1) {
+            frameCount = 0;
+            targetIndex++;
+            if (targetIndex >= targetPositions.length - 1) {
+                targetIndex = 0;
+            }
         }
     }
+    
 
     ////////////////////////////////////////////////////////////////////////
     //MOVEMENTS ANIMATION=================================================
