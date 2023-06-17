@@ -396,7 +396,7 @@ function teleportPlayerIfOob() {
 
 const loader = new GLTFLoader();
 
-let road, car, krustykrab, mrkrab, squid;
+let road, car, krustykrab, mrkrab, squid, rumah_spongebob;
 let carCapsule;
 let mixer, mixer2;
 let rumahnpc = []
@@ -470,7 +470,7 @@ loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
 });
 
 //KRUSTY KRAB================
-loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
+loader.load( '/KrustyKrab/krustykrab.glb', function ( gltf ) {
     krustykrab = gltf.scene;
     krustykrab.position.set(-20, 0, -10)
     krustykrab.traverse((node) => {
@@ -483,7 +483,23 @@ loader.load( '/KrustyKrab/krustykrab.gltf', function ( gltf ) {
     krustykrab.receiveShadow = true;
 	scene.add( krustykrab );
     //JANGAN DINYALAIN :)))))))))))
-    // worldOctree.fromGraphNode( krustykrab )
+    worldOctree.fromGraphNode( krustykrab )
+});
+
+//KRUSTY KRAB================
+loader.load( '/rumah_spongebob/rumah_spongebob.glb', function ( gltf ) {
+    rumah_spongebob = gltf.scene;
+    rumah_spongebob.position.set(20, 0, 10)
+    rumah_spongebob.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    rumah_spongebob.castShadow = true;
+    rumah_spongebob.receiveShadow = true;
+	scene.add( rumah_spongebob );
+    worldOctree.fromGraphNode( rumah_spongebob )
 });
 
 //RUMAH NPC=======================
