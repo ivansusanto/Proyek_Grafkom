@@ -396,8 +396,9 @@ function teleportPlayerIfOob() {
 
 const loader = new GLTFLoader();
 
-let road, car, krustykrab, mrkrab;
+let road, car, krustykrab, mrkrab, squid;
 let carCapsule;
+let mixer, mixer2;
 let rumahnpc = []
 let tebing = []
 
@@ -459,6 +460,13 @@ loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
 
 	scene.add( mrkrab );
     worldOctree.fromGraphNode( mrkrab )
+
+    // Create an AnimationMixer and pass in the model's animations
+    mixer2 = new THREE.AnimationMixer(mrkrab);
+
+    // Play the first animation in the model's animation array
+    const action = mixer2.clipAction(gltf.animations[0]);
+    action.play();
 });
 
 //KRUSTY KRAB================
@@ -557,6 +565,30 @@ for(let i = 0; i < 5; i++){
         // worldOctree.fromGraphNode( tebing )
     });
 }
+
+loader.load( '/squidward/squidward_spongebob.glb', function ( gltf ) {
+    squid = gltf.scene;
+    squid.scale.set(0.003, 0.003, 0.003);
+    squid.position.set(0, 1, 0)
+    squid.traverse((node) => {
+        if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+        }
+    });
+    squid.castShadow = true;
+    squid.receiveShadow = true;
+    
+	scene.add( squid );
+    worldOctree.fromGraphNode( squid )
+
+    // Create an AnimationMixer and pass in the model's animations
+    mixer = new THREE.AnimationMixer(squid);
+
+    // Play the first animation in the model's animation array
+    const action = mixer.clipAction(gltf.animations[0]);
+    action.play();
+});
 
 //FLOOR======================
 const floorSize = 200; // Size of the visible floor
@@ -802,7 +834,7 @@ function animate(){
 
     //OBJECT ANIMATE==========================================================
     const t = frameCount;
-    
+
     if(ridingCar){
         // Animasi Posisi Object
         // car.collider.center.copy(car.position)
@@ -857,7 +889,10 @@ function animate(){
         teleportPlayerIfOob();
 
     }
-
+    
+    if (mixer) mixer.update(deltaTime);
+    if (mixer2) mixer2.update(deltaTime);
+    
     renderer.render( scene, camera );
 }
 
