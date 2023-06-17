@@ -396,9 +396,9 @@ function teleportPlayerIfOob() {
 
 const loader = new GLTFLoader();
 
-let road, car, krustykrab, mrkrab, squid, rumah_spongebob;
+let road, car, krustykrab, mrkrab, squid, patrick, rumah_spongebob, chum_bucket, rumah_patrick, rumah_squidward, tiang_krustykrab, lamp;
 let carCapsule;
-let mixer, mixer2;
+let mixer_squidward, mixer_mrcrab, mixer_patrick;
 let rumahnpc = []
 let tebing = []
 
@@ -443,12 +443,30 @@ loader.load( '/Car/car.glb', function ( gltf ) {
     carOctree.fromGraphNode( car )
 });
 
+//STREET LAMP================
+loader.load( '/lamp/lamp.glb', function ( gltf ) {
+    lamp = gltf.scene;
+    lamp.scale.set(0.8, 0.8, 0.8);
+    lamp.position.set(4.3, 0.5, -8.3);
+    lamp.rotation.set(0, -2.9, 0.01);
+    lamp.traverse((node) => {
+        if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+        }
+    });
+    lamp.castShadow = true;
+    lamp.receiveShadow = true;
+	scene.add( lamp );
+    worldOctree.fromGraphNode( lamp );
+});
 
 //MR KRAB=========================
 loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
     mrkrab = gltf.scene;
-    mrkrab.scale.set(0.003, 0.003, 0.003)
-    mrkrab.position.set(5, 1.0447, -8)
+    mrkrab.scale.set(0.005, 0.005, 0.005);
+    mrkrab.rotation.set(0, 2, 0);
+    mrkrab.position.set(-20, 0.95, -20);
     mrkrab.traverse((node) => {
         if (node.isMesh) {
           node.castShadow = true;
@@ -462,34 +480,54 @@ loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
     worldOctree.fromGraphNode( mrkrab )
 
     // Create an AnimationMixer and pass in the model's animations
-    mixer2 = new THREE.AnimationMixer(mrkrab);
+    mixer_mrcrab = new THREE.AnimationMixer(mrkrab);
 
     // Play the first animation in the model's animation array
-    const action = mixer2.clipAction(gltf.animations[0]);
+    const action = mixer_mrcrab.clipAction(gltf.animations[0]);
     action.play();
 });
 
 //KRUSTY KRAB================
 loader.load( '/KrustyKrab/krustykrab.glb', function ( gltf ) {
     krustykrab = gltf.scene;
-    krustykrab.position.set(-20, 0, -10)
+    krustykrab.position.set(-25, 0, -13);
+    krustykrab.scale.set(3.5, 3.5, 3.5);
+    krustykrab.rotation.set(0, -0.8, 0);
     krustykrab.traverse((node) => {
         if (node.isMesh) {
-          node.castShadow = true;
-          node.receiveShadow = true;
+            node.castShadow = true;
+            node.receiveShadow = true;
         }
     });
     krustykrab.castShadow = true;
     krustykrab.receiveShadow = true;
 	scene.add( krustykrab );
-    //JANGAN DINYALAIN :)))))))))))
-    worldOctree.fromGraphNode( krustykrab )
+    worldOctree.fromGraphNode( krustykrab );
 });
 
-//KRUSTY KRAB================
+//TIANG KRUSTY KRAB================
+loader.load( '/tiang_krustykrab/tiang_krustykrab.glb', function ( gltf ) {
+    tiang_krustykrab = gltf.scene;
+    tiang_krustykrab.position.set(-10, 0, -14);
+    tiang_krustykrab.rotation.set(0, -2.3, 0);
+    tiang_krustykrab.traverse((node) => {
+        if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+        }
+    });
+    tiang_krustykrab.castShadow = true;
+    tiang_krustykrab.receiveShadow = true;
+	scene.add( tiang_krustykrab );
+    worldOctree.fromGraphNode( tiang_krustykrab );
+});
+
+//RUMAH SPONGEBOB================
 loader.load( '/rumah_spongebob/rumah_spongebob.glb', function ( gltf ) {
     rumah_spongebob = gltf.scene;
-    rumah_spongebob.position.set(20, 0, 10)
+    rumah_spongebob.position.set(20, 0, -34);
+    rumah_spongebob.scale.set(3.6, 3.6, 3.6);
+    rumah_spongebob.rotation.set(0, -1.5, 0);
     rumah_spongebob.traverse((node) => {
         if (node.isMesh) {
           node.castShadow = true;
@@ -500,6 +538,59 @@ loader.load( '/rumah_spongebob/rumah_spongebob.glb', function ( gltf ) {
     rumah_spongebob.receiveShadow = true;
 	scene.add( rumah_spongebob );
     worldOctree.fromGraphNode( rumah_spongebob )
+});
+
+//RUMAH SQUIDWARD================
+loader.load( '/rumah_squidward/rumah_squidward.glb', function ( gltf ) {
+    rumah_squidward = gltf.scene;
+    rumah_squidward.position.set(34, 0, -32);
+    rumah_squidward.scale.set(2.8, 2.8, 2.8);
+    rumah_squidward.rotation.set(0, -1.8, 0);
+    rumah_squidward.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    rumah_squidward.castShadow = true;
+    rumah_squidward.receiveShadow = true;
+	scene.add( rumah_squidward );
+    worldOctree.fromGraphNode( rumah_squidward )
+});
+
+//RUMAH PATRICK================
+loader.load( '/rumah_patrick/rumah_patrick.glb', function ( gltf ) {
+    rumah_patrick = gltf.scene;
+    rumah_patrick.position.set(49, 0, -28);
+    rumah_patrick.scale.set(2.8, 2.8, 2.8);
+    rumah_patrick.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    rumah_patrick.castShadow = true;
+    rumah_patrick.receiveShadow = true;
+	scene.add( rumah_patrick );
+    worldOctree.fromGraphNode( rumah_patrick )
+});
+
+//CHUM BUCKET================
+loader.load( '/chum_bucket/chum_bucket.glb', function ( gltf ) {
+    chum_bucket = gltf.scene;
+    chum_bucket.position.set(-10, 0, -35);
+    chum_bucket.rotation.set(0, -0.2, 0);
+    chum_bucket.scale.set(0.07, 0.07, 0.07);
+    chum_bucket.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    chum_bucket.castShadow = true;
+    chum_bucket.receiveShadow = true;
+	scene.add( chum_bucket );
+    worldOctree.fromGraphNode( chum_bucket )
 });
 
 //RUMAH NPC=======================
@@ -531,8 +622,8 @@ for(let i = 0; i < 5; i++){
         });
         rumahnpc[i].castShadow = true;
         rumahnpc[i].receiveShadow = true;
-        scene.add( rumahnpc[i] );
-        worldOctree.fromGraphNode( rumahnpc[i] )
+        // scene.add( rumahnpc[i] );
+        // worldOctree.fromGraphNode( rumahnpc[i] )
     });
 }
 
@@ -582,10 +673,11 @@ for(let i = 0; i < 5; i++){
     });
 }
 
-loader.load( '/squidward/squidward_spongebob.glb', function ( gltf ) {
+//SQUIDWARD=======================
+loader.load('/squidward/squidward_spongebob.glb', function ( gltf ) {
     squid = gltf.scene;
-    squid.scale.set(0.003, 0.003, 0.003);
-    squid.position.set(0, 1, 0)
+    squid.scale.set(0.0028, 0.0028, 0.0028);
+    squid.position.set(33, 0.8, -28);
     squid.traverse((node) => {
         if (node.isMesh) {
             node.castShadow = true;
@@ -599,10 +691,36 @@ loader.load( '/squidward/squidward_spongebob.glb', function ( gltf ) {
     worldOctree.fromGraphNode( squid )
 
     // Create an AnimationMixer and pass in the model's animations
-    mixer = new THREE.AnimationMixer(squid);
+    mixer_squidward = new THREE.AnimationMixer(squid);
 
     // Play the first animation in the model's animation array
-    const action = mixer.clipAction(gltf.animations[0]);
+    const action = mixer_squidward.clipAction(gltf.animations[0]);
+    action.play();
+});
+
+//PATRICK=======================
+loader.load('/patrick/patrick.glb', function ( gltf ) {
+    patrick = gltf.scene;
+    patrick.scale.set(0.5, 0.5, 0.5);
+    patrick.position.set(-15, 0, -16);
+    patrick.rotation.set(0, -0.8, 0);
+    patrick.traverse((node) => {
+        if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+        }
+    });
+    patrick.castShadow = true;
+    patrick.receiveShadow = true;
+    
+	scene.add( patrick );
+    worldOctree.fromGraphNode( patrick )
+
+    // Create an AnimationMixer and pass in the model's animations
+    mixer_patrick = new THREE.AnimationMixer(patrick);
+
+    // Play the first animation in the model's animation array
+    const action = mixer_patrick.clipAction(gltf.animations[0]);
     action.play();
 });
 
@@ -906,8 +1024,9 @@ function animate(){
 
     }
     
-    if (mixer) mixer.update(deltaTime);
-    if (mixer2) mixer2.update(deltaTime);
+    if (mixer_squidward) mixer_squidward.update(deltaTime);
+    if (mixer_mrcrab) mixer_mrcrab.update(deltaTime);
+    if (mixer_patrick) mixer_patrick.update(deltaTime);
     
     renderer.render( scene, camera );
 }
