@@ -490,7 +490,7 @@ loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
 //KRUSTY KRAB================
 loader.load( '/KrustyKrab/krustykrab.glb', function ( gltf ) {
     krustykrab = gltf.scene;
-    krustykrab.position.set(-25, 0, -13);
+    krustykrab.position.set(-25, -0.5, -13);
     krustykrab.scale.set(3.5, 3.5, 3.5);
     krustykrab.rotation.set(0, -0.8, 0);
     krustykrab.traverse((node) => {
