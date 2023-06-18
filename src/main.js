@@ -8,12 +8,6 @@ import { Capsule } from 'three/addons/math/Capsule.js';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.rotation.order = 'YXZ';
-// camera.position.set( 0, 50, -20 );
-// camera.lookAt( 0, 0, -20 );
-
-// const renderer = new THREE.WebGLRenderer();
-// renderer.setSize( window.innerWidth, window.innerHeight );
-// document.body.appendChild( renderer.domElement );
 
 ////////////////////////
 const container = document.getElementById( 'container' );
@@ -39,7 +33,6 @@ function onWindowResize() {
     
 }
 
-
 ////////////////////////
 const clock = new THREE.Clock();
 const GRAVITY = 30;
@@ -50,7 +43,7 @@ const STEPS_PER_FRAME = 1;
 const worldOctree = new Octree();
 let carOctree = new Octree();
 
-const playerCollider = new Capsule( new THREE.Vector3( 10, 0.8, 10 ), new THREE.Vector3( 10, 1.2, 10 ), 0.8 );
+const playerCollider = new Capsule( new THREE.Vector3( -9, 0.8, 5 ), new THREE.Vector3( -9, 1.2, 5 ), 0.8 );
 
 const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
@@ -59,10 +52,6 @@ let playerOnFloor = false;
 let mouseTime = 0;
 
 const keyStates = {};
-
-// const vector1 = new THREE.Vector3();
-// const vector2 = new THREE.Vector3();
-// const vector3 = new THREE.Vector3();
 
 document.addEventListener( 'keydown', ( event ) => {
 
@@ -133,37 +122,15 @@ function playerCollisions() {
 
     }
 
-    if ( result2 ) {
-
-        playerCollider.translate( result2.normal.multiplyScalar( result2.depth ) );
-
-        // if (playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
-        //     // Collision with a rectangle detected
-    
-        //     // Calculate the direction vector from rectangle to player
-        //     const direction = getPlayerDirection(carCapsule.collider, playerCollider);
-    
-        //     // Apply the throwing effect
-        //     const throwDistance = -15; // Adjust this value to control the throw distance
-        //     const throwHeight = 5; // Adjust this value to control the throw height
-        //     const throwVector = direction.clone().multiplyScalar(throwDistance);
-        //     throwVector.y += throwHeight;
-        //     playerVelocity.add(throwVector);
-    
-        //     // Additional feedback or actions for the player
-        //     console.log("Collision with a rectangle!");
-        // }
-
-    }
-
+    if ( result2 )  playerCollider.translate( result2.normal.multiplyScalar( result2.depth ) );
 }
 
-function getPlayerDirection(objectCollider, playerCollider) {
-    const carCenter = objectCollider.getCenter(new THREE.Vector3());
-    const playerCenter = playerCollider.getCenter(new THREE.Vector3());
+// function getPlayerDirection(objectCollider, playerCollider) {
+//     const carCenter = objectCollider.getCenter(new THREE.Vector3());
+//     const playerCenter = playerCollider.getCenter(new THREE.Vector3());
   
-    return carCenter.sub(playerCenter).normalize();
-}
+//     return carCenter.sub(playerCenter).normalize();
+// }
 
 let ridingCar = false;
 let ridingTimer = 0;
@@ -198,95 +165,21 @@ function updatePlayer( deltaTime ) {
     }
     
     if((keyStates[ 'KeyF' ] || keyStates[ 'Space' ]) && ridingCar && ridingTimer == 0){
-        // playerCollider.start.set( 10, 0.8, 10 );
-        // playerCollider.end.set( 10, 1.2, 10 );
-
-        // playerCollider.start.x = camera.position.x + 4
-        // playerCollider.start.y = 0.8
-        // playerCollider.start.z = camera.position.z
-
-        // playerCollider.end.x = camera.position.x + 4
-        // playerCollider.end.y = 1.2
-        // playerCollider.end.z = camera.position.z
-
-        // playerCollider.radius = 0.8;
-
-        teleportPlayerToRightSide(car, 1)
+        teleportPlayerToRightSide(car, 2)
 
         carOctree = new Octree();
         carOctree.fromGraphNode(car);
 
         ridingCar = false;
         ridingTimer++;
-    }
-    else if(carCapsule && carCapsule.collider && isPlayerAroundObject(carCapsule.collider, playerCollider) && keyStates[ 'KeyF' ] && !ridingCar && ridingTimer == 0) {
+    } else if(carCapsule && carCapsule.collider && isPlayerAroundObject(carCapsule.collider, playerCollider, 6) && keyStates[ 'KeyF' ] && !ridingCar && ridingTimer == 0) {
         ridingCar = true;
         ridingTimer++;
     }
-    
-    // if(ridingCar){
-    //     console.log("lul")
-    // }
-    
-    // if(isPlayerAroundRectangle && keyStates[ 'KeyF' ] && ridingCar){
-    //     ridingCar = false;
-    // }
 }
 
 //TURUN MOBIL
 function teleportPlayerToRightSide(object, offset) {
-    // const objectPosition = objectCollider.getCenter(new THREE.Vector3());
-    // const objectSize = objectCollider.getSize(new THREE.Vector3());
-
-    // // Calculate the direction of the rectangle
-    // const objectDirection = objectPosition.clone().sub(previousObjectPosition).normalize();
-    // // previousObjectPosition = objectPosition.clone();
-  
-    // // Calculate the right side position based on the rectangle's direction
-    // const rightSidePosition = objectPosition.clone().addScaledVector(objectDirection, objectSize.x + playerCollider.radius);
-    // // console.log(objectPosition)
-    // // console.log(rightSidePosition)
-  
-    // // playerCollider.start.set(rightSidePosition);
-    // // playerCollider.end.set(rightSidePosition);
-    // // camera.position.copy(rightSidePosition);
-
-    // playerCollider.start.x = rightSidePosition.x
-    // playerCollider.start.y = 0.8
-    // playerCollider.start.z = rightSidePosition.z
-
-    // playerCollider.end.x = rightSidePosition.x
-    // playerCollider.end.y = 1.2
-    // playerCollider.end.z = rightSidePosition.z
-
-    // camera.position.copy(playerCollider.end);
-
-    // const objectPosition = object.position.clone();
-    // const objectSize = object.scale.clone();
-
-    // // Calculate the object's direction based on its rotation
-    // const objectDirection = new THREE.Vector3(1, 0, 1); // Assuming the object's initial direction is along the x-axis
-    // objectDirection.applyQuaternion(object.quaternion);
-
-    // // Calculate the right side position based on the object's direction, position, and size
-    // const rightSidePositionStart = new THREE.Vector3(
-    //     objectPosition.x + (objectSize.x * 0.5) + playerCollider.radius * objectDirection.x,
-    //     0.8,
-    //     objectPosition.z + (objectSize.z * 0.5) + playerCollider.radius * objectDirection.z
-    // );
-    // const rightSidePositionEnd = new THREE.Vector3(
-    //     objectPosition.x + (objectSize.x * 0.5) + playerCollider.radius * objectDirection.x,
-    //     1.2,
-    //     objectPosition.z + (objectSize.z * 0.5) + playerCollider.radius * objectDirection.z
-    // );
-
-    // // Update the start and end points of the playerCollider
-    // playerCollider.start.copy(rightSidePositionStart);
-    // playerCollider.end.copy(rightSidePositionEnd);
-
-    // // Update the camera position
-    // camera.position.copy(rightSidePositionEnd);
-
     const objectPosition = new THREE.Vector3();
     object.getWorldPosition(objectPosition);
 
@@ -305,12 +198,12 @@ function teleportPlayerToRightSide(object, offset) {
 }
 
 //CEK DEKET OBJECT
-function isPlayerAroundObject(objectCollider, playerCollider) {
+function isPlayerAroundObject(objectCollider, playerCollider, threshold) {
     const playerPosition = playerCollider.getCenter(new THREE.Vector3());
     const objectPosition = objectCollider.getCenter(new THREE.Vector3());
   
     const distance = playerPosition.distanceTo(objectPosition);
-    const proximityThreshold = 6; // Adjust this value to control the proximity threshold
+    const proximityThreshold = threshold; // Adjust this value to control the proximity threshold
     return distance <= proximityThreshold;
 }
 
@@ -380,8 +273,8 @@ function teleportPlayerIfOob() {
 
     if ( camera.position.y <= - 25 ) {
 
-        playerCollider.start.set( 10, 0.8, 10 );
-        playerCollider.end.set( 10, 1.2, 10 );
+        playerCollider.start.set( -9, 0.8, 5 );
+        playerCollider.end.set( -9, 1.2, 5 );
         playerCollider.radius = 0.8;
         camera.position.copy( playerCollider.end );
         camera.rotation.set( 0, 0, 0 );
@@ -396,11 +289,12 @@ function teleportPlayerIfOob() {
 
 const loader = new GLTFLoader();
 
-let road, car, krustykrab, mrkrab, squid, patrick, rumah_spongebob, chum_bucket, rumah_patrick, rumah_squidward, tiang_krustykrab, lamp;
+let road, car, krustykrab, mrkrab, plankton, squid, patrick, rumah_spongebob, chum_bucket, rumah_patrick, rumah_squidward, tiang_krustykrab, sun, moon;
 let carCapsule;
-let mixer_squidward, mixer_mrcrab, mixer_patrick;
-let rumahnpc = []
-let tebing = []
+let mixer_squidward, mixer_mrcrab, mixer_patrick, mixer_plankton;
+let rumahnpc = [];
+let lamp = [];
+let lampCollider = [];
 
 //ROAD=======================
 loader.load( '/Road/road.glb', function ( gltf ) {
@@ -443,24 +337,6 @@ loader.load( '/Car/car.glb', function ( gltf ) {
     carOctree.fromGraphNode( car )
 });
 
-//STREET LAMP================
-loader.load( '/lamp/lamp.glb', function ( gltf ) {
-    lamp = gltf.scene;
-    lamp.scale.set(0.8, 0.8, 0.8);
-    lamp.position.set(4.3, 0.5, -8.3);
-    lamp.rotation.set(0, -2.9, 0.01);
-    lamp.traverse((node) => {
-        if (node.isMesh) {
-            node.castShadow = true;
-            node.receiveShadow = true;
-        }
-    });
-    lamp.castShadow = true;
-    lamp.receiveShadow = true;
-	scene.add( lamp );
-    worldOctree.fromGraphNode( lamp );
-});
-
 //MR KRAB=========================
 loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
     mrkrab = gltf.scene;
@@ -484,6 +360,32 @@ loader.load( '/mr_krab/mr_krab.glb', function ( gltf ) {
 
     // Play the first animation in the model's animation array
     const action = mixer_mrcrab.clipAction(gltf.animations[0]);
+    action.play();
+});
+
+//PLANKTON=========================
+loader.load( '/plankton/plankton.glb', function ( gltf ) {
+    plankton = gltf.scene;
+    plankton.scale.set(0.25, 0.25, 0.25);
+    plankton.rotation.set(0, -1, 0);
+    plankton.position.set(-10, -0.01, -30);
+    plankton.traverse((node) => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+    });
+    plankton.castShadow = true;
+    plankton.receiveShadow = true;
+
+	scene.add( plankton );
+    worldOctree.fromGraphNode( plankton )
+
+    // Create an AnimationMixer and pass in the model's animations
+    mixer_plankton = new THREE.AnimationMixer(plankton);
+
+    // Play the first animation in the model's animation array
+    const action = mixer_plankton.clipAction(gltf.animations[0]);
     action.play();
 });
 
@@ -537,7 +439,7 @@ loader.load( '/rumah_spongebob/rumah_spongebob.glb', function ( gltf ) {
     rumah_spongebob.castShadow = true;
     rumah_spongebob.receiveShadow = true;
 	scene.add( rumah_spongebob );
-    worldOctree.fromGraphNode( rumah_spongebob )
+    worldOctree.fromGraphNode( rumah_spongebob );
 });
 
 //RUMAH SQUIDWARD================
@@ -555,7 +457,7 @@ loader.load( '/rumah_squidward/rumah_squidward.glb', function ( gltf ) {
     rumah_squidward.castShadow = true;
     rumah_squidward.receiveShadow = true;
 	scene.add( rumah_squidward );
-    worldOctree.fromGraphNode( rumah_squidward )
+    worldOctree.fromGraphNode( rumah_squidward );
 });
 
 //RUMAH PATRICK================
@@ -572,7 +474,7 @@ loader.load( '/rumah_patrick/rumah_patrick.glb', function ( gltf ) {
     rumah_patrick.castShadow = true;
     rumah_patrick.receiveShadow = true;
 	scene.add( rumah_patrick );
-    worldOctree.fromGraphNode( rumah_patrick )
+    worldOctree.fromGraphNode( rumah_patrick );
 });
 
 //CHUM BUCKET================
@@ -590,30 +492,27 @@ loader.load( '/chum_bucket/chum_bucket.glb', function ( gltf ) {
     chum_bucket.castShadow = true;
     chum_bucket.receiveShadow = true;
 	scene.add( chum_bucket );
-    worldOctree.fromGraphNode( chum_bucket )
+    worldOctree.fromGraphNode( chum_bucket );
 });
 
+const npcPosition = [
+    {x: 10, y: 0, z: 10},
+    {x: 54, y: 0.5, z: 3},
+    {x: 52, y: 0.5, z: -55},
+    {x: 12, y: 0.5, z: -58},
+    {x: -27, y: 0.5, z: -60},
+    {x: -62, y: 0.5, z: -28},
+    {x: -43, y: 0.5, z: 13}
+];
+
 //RUMAH NPC=======================
-for(let i = 0; i < 5; i++){
+for(let i = 0; i < npcPosition.length; i++){
     loader.load( '/RumahNPC/rumahnpc.glb', function ( gltf ) {
+        const npc = npcPosition[i];
         rumahnpc[i] = gltf.scene;
-        if(i == 0){
-            rumahnpc[i].position.set(-10, 0, -7)
-        }
-        if(i == 1){
-            rumahnpc[i].position.set(20, 0, -13)
-            rumahnpc[i].rotation.set(0, -0.7, 0)
-        }
-        if(i == 2){
-            rumahnpc[i].position.set(37, 0, -10)
-        }
-        if(i == 3){
-            rumahnpc[i].position.set(54, 0, -25)
-        }
-        if(i == 4){
-            rumahnpc[i].position.set(40, 0, -35)
-            rumahnpc[i].rotation.set(0, 3, 0)
-        }
+        rumahnpc[i].position.set(npc.x, npc.y, npc.z);
+        rumahnpc[i].rotation.set(0, (Math.random() * 360 - 180) * (Math.PI / 180), 0);
+
         rumahnpc[i].traverse((node) => {
             if (node.isMesh) {
               node.castShadow = true;
@@ -622,54 +521,8 @@ for(let i = 0; i < 5; i++){
         });
         rumahnpc[i].castShadow = true;
         rumahnpc[i].receiveShadow = true;
-        // scene.add( rumahnpc[i] );
-        // worldOctree.fromGraphNode( rumahnpc[i] )
-    });
-}
-
-//TEBING TEBING APA YANG BISA MOTONG POHON (TEBI(A)NG POHON)=======================
-for(let i = 0; i < 5; i++){
-    loader.load( '/Tebing/tebing.glb', function ( gltf ) {
-        // tebing[i] = gltf.scene;
-        // if(i == 0){
-        //     tebing[i].position.set(-10, 0, -7)
-        // }
-        // if(i == 1){
-        //     tebing[i].position.set(20, 0, -13)
-        //     tebing[i].rotation.set(0, -0.7, 0)
-        // }
-        // if(i == 2){
-        //     tebing[i].position.set(37, 0, -10)
-        // }
-        // if(i == 3){
-        //     tebing[i].position.set(54, 0, -25)
-        // }
-        // if(i == 4){
-        //     tebing[i].position.set(40, 0, -35)
-        //     tebing[i].rotation.set(0, 3, 0)
-        // }
-        // tebing[i].traverse((node) => {
-        //     if (node.isMesh) {
-        //       node.castShadow = true;
-        //       node.receiveShadow = true;
-        //     }
-        // });
-        // tebing[i].castShadow = true;
-        // tebing[i].receiveShadow = true;
-        // scene.add( tebing[i] );
-        // worldOctree.fromGraphNode( tebing[i] )
-        tebing = gltf.scene;
-        tebing.position.set(1000, 0, -200)
-        tebing.traverse((node) => {
-            if (node.isMesh) {
-            node.castShadow = true;
-            node.receiveShadow = true;
-            }
-        });
-        tebing.castShadow = true;
-        tebing.receiveShadow = true;
-        // scene.add( tebing );
-        // worldOctree.fromGraphNode( tebing )
+        scene.add( rumahnpc[i] );
+        worldOctree.fromGraphNode( rumahnpc[i] );
     });
 }
 
@@ -688,7 +541,7 @@ loader.load('/squidward/squidward_spongebob.glb', function ( gltf ) {
     squid.receiveShadow = true;
     
 	scene.add( squid );
-    worldOctree.fromGraphNode( squid )
+    worldOctree.fromGraphNode( squid );
 
     // Create an AnimationMixer and pass in the model's animations
     mixer_squidward = new THREE.AnimationMixer(squid);
@@ -714,7 +567,7 @@ loader.load('/patrick/patrick.glb', function ( gltf ) {
     patrick.receiveShadow = true;
     
 	scene.add( patrick );
-    worldOctree.fromGraphNode( patrick )
+    worldOctree.fromGraphNode( patrick );
 
     // Create an AnimationMixer and pass in the model's animations
     mixer_patrick = new THREE.AnimationMixer(patrick);
@@ -723,6 +576,66 @@ loader.load('/patrick/patrick.glb', function ( gltf ) {
     const action = mixer_patrick.clipAction(gltf.animations[0]);
     action.play();
 });
+
+//SUN================
+loader.load( '/sun/sun.glb', function ( gltf ) {
+    sun = gltf.scene;
+    sun.position.set(350, 350, -10);
+    sun.scale.set(0.1, 0.1, 0.1);
+	scene.add( sun );
+});
+
+//MOON================
+loader.load( '/moon/moon.glb', function ( gltf ) {
+    moon = gltf.scene;
+    moon.position.set(-350, -350, -10);
+	scene.add( moon );
+});
+
+const lampPosition = [
+    {x: 4.3, y: 0.5, z: -7.5},
+    {x: 42, y: 0.5, z: -9},
+    {x: 56.5, y: 0.5, z: -21.5},
+    {x: 52, y: 0.5, z: -36},
+    {x: -0.2, y: 0.5, z: -42},
+    {x: -37.6, y: 0.5, z: -43},
+    {x: -45, y: 0.5, z: -15.8},
+    {x: -19.8, y: 0.5, z: 4}
+];
+
+const lampRotation = [
+    {x: 0, y: -2.9, z: 0.01},
+    {x: 0, y: -2.4, z: 0.01},
+    {x: 0, y: -2.3, z: 0.01},
+    {x: 0, y: -0.5, z: 0.01},
+    {x: 0, y: -0.1, z: 0.01},
+    {x: 0, y: 0.2, z: 0.01},
+    {x: 0, y: 1.68, z: 0.01},
+    {x: 0, y: -2.7, z: 0.01}
+];
+
+//STREET LAMP================
+for (let i = 0; i < lampPosition.length; i++) {
+    loader.load( '/lamp/lamp.glb', function ( gltf ) {
+        const lp = lampPosition[i];
+        const lr = lampRotation[i];
+        lamp[i] = gltf.scene;
+        lamp[i].scale.set(0.8, 0.8, 0.8);
+        lamp[i].position.set(lp.x, lp.y, lp.z);
+        lamp[i].rotation.set(lr.x, lr.y, lr.z);
+        lamp[i].traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+        lamp[i].castShadow = true;
+        lamp[i].receiveShadow = true;
+        lampCollider[i] = new THREE.Box3().setFromObject(lamp[i]);
+        scene.add( lamp[i] );
+        worldOctree.fromGraphNode( lamp[i] );
+    });
+}
 
 //FLOOR======================
 const floorSize = 200; // Size of the visible floor
@@ -812,107 +725,37 @@ const hemiLightMalam = new THREE.HemisphereLight( 0x0c3b66, 0x444444, 0.6 );
 hemiLightMalam.position.set( -250, -250, 10 );
 scene.add( hemiLightMalam );
 
-const spotlight = new THREE.SpotLight(0xfcf49a, 0);
-spotlight.position.set(5, 10, -5); // Atur posisi lampu di atas objek yang ingin disorot
-spotlight.target.position.set(5, 0, -5); // Atur posisi target yang ingin disorot
-spotlight.castShadow = true; // Aktifkan pengelempokan bayangan pada spotlight
-spotlight.shadow.mapSize.width = 4096; // Ukuran bayangan lebar
-spotlight.shadow.mapSize.height = 4096; // Ukuran bayangan tinggi
-spotlight.shadow.camera.near = 0.1; // Jarak terdekat bayangan
-spotlight.shadow.camera.far = 50; // Jarak terjauh bayangan
-spotlight.shadow.camera.fov = 30; // Sudut pandang bayangan
-spotlight.angle = Math.PI / 7; //
-spotlight.penumbra = 0.5; // Intensitas penumbra cahaya
-scene.add(spotlight);
-scene.add(spotlight.target);
+const spotlightPosition = [
+    {x: 5, y: 10, z: -5},
+    {x: 44, y: 10, z: -7.2},
+    {x: 59, y: 10, z: -20},
+    {x: 54, y: 10, z: -39},
+    {x: 0, y: 10, z: -45.3},
+    {x: -38, y: 10, z: -46.6},
+    {x: -48, y: 10, z: -15},
+    {x: -19, y: 10, z: 7}
+];
+const spotlight = [];
+for (let i = 0; i < spotlightPosition.length; i++) {
+    const s = spotlightPosition[i];
+    spotlight[i] = new THREE.SpotLight(0xfcf49a, 0);
+    spotlight[i].position.set(s.x, s.y, s.z); // Atur posisi lampu di atas objek yang ingin disorot
+    spotlight[i].target.position.set(s.x, 0, s.z); // Atur posisi target yang ingin disorot
+    spotlight[i].castShadow = true; // Aktifkan pengelempokan bayangan pada spotlight
+    spotlight[i].shadow.mapSize.width = 4096; // Ukuran bayangan lebar
+    spotlight[i].shadow.mapSize.height = 4096; // Ukuran bayangan tinggi
+    spotlight[i].shadow.camera.near = 0.1; // Jarak terdekat bayangan
+    spotlight[i].shadow.camera.far = 50; // Jarak terjauh bayangan
+    spotlight[i].shadow.camera.fov = 30; // Sudut pandang bayangan
+    spotlight[i].angle = Math.PI / 7; //
+    spotlight[i].penumbra = 0.5; // Intensitas penumbra cahaya
+    scene.add(spotlight[i]);
+    scene.add(spotlight[i].target);
+}
 
 const hemiLampu = new THREE.HemisphereLight( 0xfcf49a, 0x444444, 0 );
 hemiLampu.position.set( 5, 10, -5 );
 scene.add( hemiLampu );
-
-// Animation lampu biar jadi siang malem
-function animateLight() {
-    // Menghitung sudut rotasi
-    var angle = Date.now() * 0.0001; // Nilai sudut berdasarkan waktu
-
-    // Mengatur posisi objek dengan jari jari
-    var radius = 250;
-    var x = Math.cos(angle) * radius;
-    var y = Math.sin(angle) * radius;
-
-    // Mengubah posisi objek
-    //Siang
-    matahari.position.x = x;
-    matahari.position.y = y;
-    
-    hemiLightSiang.position.x = x;
-    hemiLightSiang.position.y = y;
-
-    hemiLightSiang2.position.x = -x;
-    hemiLightSiang2.position.y = y;
-
-    //Malem
-    bulan.position.x = -x;
-    bulan.position.y = -y;
-
-    hemiLightMalam.position.x = -x;
-    hemiLightMalam.position.y = -y;
-
-    // Intensity cahaya
-    //Siang
-    if(y < -25 && matahari.intensity > 0.2){
-        matahari.intensity -= 0.005
-        hemiLightSiang.intensity -= 0.005
-        hemiLightSiang2.intensity -= 0.005
-    }else if(y >= -25 && matahari.intensity < 1){
-        matahari.intensity += 0.005
-        hemiLightSiang.intensity += 0.005
-        hemiLightSiang2.intensity += 0.005
-    }
-    // console.log(matahari.intensity)
-    if(y >= 0){
-        spotlight.intensity = 0
-        hemiLampu.intensity = 0
-        if (road) {
-            road.traverse((node) => {
-                if (node.isMesh) {
-                    node.castShadow = true;
-                    node.receiveShadow = true;
-                }
-            });
-        }
-    }else{
-        spotlight.intensity = 1
-        hemiLampu.intensity = 0.1
-        if (road) {
-            road.traverse((node) => {
-                if (node.isMesh) {
-                    node.castShadow = false;
-                    node.receiveShadow = true;
-                }
-            });
-        }
-    }
-
-    // Next animation
-    requestAnimationFrame(animateLight);
-}
-animateLight();
-
-// const matahari2 = new THREE.DirectionalLight( 0xffffff );
-// matahari2.position.set( 20, 10, -5 );
-// matahari2.castShadow = true;
-// matahari2.shadow.camera.top = 2;
-// matahari2.shadow.camera.bottom = - 2;
-// matahari2.shadow.camera.left = - 2;
-// matahari2.shadow.camera.right = 2;
-// // matahari2.shadow.camera.near = 0.1;
-// // matahari2.shadow.camera.far = 40;
-// matahari2.shadow.camera.near = 0.1;
-// matahari2.shadow.camera.far = 1000;
-// matahari2.shadow.mapSize.width = 4096;
-// matahari2.shadow.mapSize.height = 4096;
-// scene.add( matahari2 );
 
 //OBJECT MOVE=========================================
 // Titik titik belok
@@ -973,7 +816,7 @@ function animate(){
         // Animasi Posisi Object
         // car.collider.center.copy(car.position)
         car.position.lerp(targetPositions[targetIndex], t);
-        carCapsule.collider = new THREE.Box3().setFromObject(car)
+        carCapsule.collider = new THREE.Box3().setFromObject(car);
         
         // Animasi Rotasi Object
         car.rotation.x = THREE.MathUtils.lerp(car.rotation.x, targetRotations[targetIndex].x, t);
@@ -986,16 +829,7 @@ function animate(){
             y: targetPositions[targetIndex].y + 1.5,
             z: targetPositions[targetIndex].z
         }, t);
-        // playerCollider.end.set(targetPositions[targetIndex].x, targetPositions[targetIndex].y + 1.5, targetPositions[targetIndex].z)
-        
-        // Animasi Rotasi Camera
-        // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
-        // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
-        // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
 
-        // camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetRotations[targetIndex].z, t);
-        // camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetRotations[targetIndex].y + Math.PI, t);
-        // camera.rotation.z = THREE.MathUtils.lerp(camera.rotation.z, targetRotations[targetIndex].x, t);
         frameCount++;
         if (frameCount > 1) {
             frameCount = 0;
@@ -1011,9 +845,6 @@ function animate(){
     //MOVEMENTS ANIMATION=================================================
     const deltaTime = Math.min( 0.05, clock.getDelta()*1.15 ) / STEPS_PER_FRAME;
 
-    // we look for collisions in substeps to mitigate the risk of
-    // an object traversing another too quickly for detection.
-
     for ( let i = 0; i < STEPS_PER_FRAME; i ++ ) {
 
         controls( deltaTime );
@@ -1024,10 +855,97 @@ function animate(){
 
     }
     
+    // Apply animasi yang dari 3D model blender
     if (mixer_squidward) mixer_squidward.update(deltaTime);
     if (mixer_mrcrab) mixer_mrcrab.update(deltaTime);
     if (mixer_patrick) mixer_patrick.update(deltaTime);
+    if (mixer_plankton) mixer_plankton.update(deltaTime);
     
+    // Menghitung sudut rotasi
+    var angle = Date.now() * 0.0001; // Nilai sudut berdasarkan waktu
+
+    // Mengatur posisi objek dengan jari jari
+    var radius = 250;
+    var x = Math.cos(angle) * radius;
+    var y = Math.sin(angle) * radius;
+
+    // Mengubah posisi objek
+    //Siang
+    matahari.position.x = x;
+    matahari.position.y = y;
+    
+    if (sun) {
+        sun.position.x = x;
+        sun.position.y = y;
+        sun.rotation.z += 0.0005;
+    }
+    
+    hemiLightSiang.position.x = x;
+    hemiLightSiang.position.y = y;
+
+    hemiLightSiang2.position.x = -x;
+    hemiLightSiang2.position.y = y;
+
+    //Malem
+    bulan.position.x = -x;
+    bulan.position.y = -y;
+
+    if (moon) {
+        moon.position.x = -x;
+        moon.position.y = -y;
+        moon.rotation.z += 0.0005;
+    }
+
+    hemiLightMalam.position.x = -x;
+    hemiLightMalam.position.y = -y;
+
+    // Intensity cahaya
+    //Siang
+    if(y < -25 && matahari.intensity > 0.2){
+        matahari.intensity -= 0.005
+        hemiLightSiang.intensity -= 0.005
+        hemiLightSiang2.intensity -= 0.005
+    }else if(y >= -25 && matahari.intensity < 1){
+        matahari.intensity += 0.005
+        hemiLightSiang.intensity += 0.005
+        hemiLightSiang2.intensity += 0.005
+    }
+    // console.log(matahari.intensity)
+    if(y >= 0){
+        for(let i = 0; i < spotlightPosition.length; i++) {
+            spotlight[i].intensity = 0;
+        }
+        hemiLampu.intensity = 0;
+
+        if (road) {
+            road.traverse((node) => {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                }
+            });
+        }
+    }else{
+        for(let i = 0; i < lampCollider.length; i++) {
+            if ((lampCollider[i] && isPlayerAroundObject(lampCollider[i], playerCollider, 10) && !ridingCar) || (carCapsule.collider && isPlayerAroundObject(lampCollider[i], carCapsule.collider, 10))) {
+                spotlight[i].intensity = 1;
+                hemiLampu.intensity = 0.1;
+            } else {
+                spotlight[i].intensity = 0;
+                hemiLampu.intensity = 0;
+            }
+        }
+        
+        if (road) {
+            road.traverse((node) => {
+                if (node.isMesh) {
+                    node.castShadow = false;
+                    node.receiveShadow = true;
+                }
+            });
+        }
+    }
+
     renderer.render( scene, camera );
 }
 
