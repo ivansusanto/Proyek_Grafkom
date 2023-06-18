@@ -505,12 +505,12 @@ loader.load( '/chum_bucket/chum_bucket.glb', function ( gltf ) {
 
 const npcPosition = [
     {x: 10, y: 0, z: 10},
-    {x: 54, y: 0.5, z: 3},
-    {x: 52, y: 0.5, z: -55},
-    {x: 12, y: 0.5, z: -58},
-    {x: -27, y: 0.5, z: -60},
-    {x: -62, y: 0.5, z: -28},
-    {x: -43, y: 0.5, z: 13}
+    {x: 54, y: 0, z: 3},
+    {x: 52, y: 0, z: -55},
+    {x: 12, y: 0, z: -58},
+    {x: -27, y: 0, z: -60},
+    {x: -62, y: 0, z: -28},
+    {x: -43, y: 0, z: 13}
 ];
 
 //RUMAH NPC=======================
@@ -918,7 +918,7 @@ function animate(){
         hemiLightSiang.intensity += 0.005
         hemiLightSiang2.intensity += 0.005
     }
-    
+
     if(y >= 0){
         for(let i = 0; i < spotlightPosition.length; i++) {
             spotlight[i].intensity = 0;
