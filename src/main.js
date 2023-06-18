@@ -164,6 +164,12 @@ function updatePlayer( deltaTime ) {
     if (keyStates[ 'KeyT' ] && ridingTimer == 0) {
         automaticRiding = !automaticRiding;
         ridingTimer++;
+        if (automaticRiding) {
+            carOctree = new Octree();
+        } else {
+            carOctree = new Octree();
+            carOctree.fromGraphNode(car);
+        }
     }
 
     if ((keyStates[ 'KeyF' ] || keyStates[ 'Space' ]) && ridingCar && ridingTimer == 0){
@@ -814,8 +820,6 @@ function animate(){
     //OBJECT ANIMATE==========================================================
     const t = frameCount;
 
-    console.log(automaticRiding);
-
     if(ridingCar || automaticRiding) {        
         // Animasi Posisi Object
         // car.collider.center.copy(car.position)
@@ -914,7 +918,7 @@ function animate(){
         hemiLightSiang.intensity += 0.005
         hemiLightSiang2.intensity += 0.005
     }
-    // console.log(matahari.intensity)
+    
     if(y >= 0){
         for(let i = 0; i < spotlightPosition.length; i++) {
             spotlight[i].intensity = 0;
