@@ -103,35 +103,33 @@ function playerCollisions() {
 
         playerCollider.translate( result.normal.multiplyScalar( result.depth ) );
 
-        // if (playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
-        //     // Collision with a rectangle detected
+        if (automaticRiding && playerCollider.intersectsBox(carCapsule.collider) && !ridingCar) {
+            // Collision with a rectangle detected
     
-        //     // Calculate the direction vector from rectangle to player
-        //     const direction = getPlayerDirection(carCapsule.collider, playerCollider);
+            // Calculate the direction vector from rectangle to player
+            const direction = getPlayerDirection(carCapsule.collider, playerCollider);
     
-        //     // Apply the throwing effect
-        //     const throwDistance = -15; // Adjust this value to control the throw distance
-        //     const throwHeight = 5; // Adjust this value to control the throw height
-        //     const throwVector = direction.clone().multiplyScalar(throwDistance);
-        //     throwVector.y += throwHeight;
-        //     playerVelocity.add(throwVector);
-    
-        //     // Additional feedback or actions for the player
-        //     console.log("Collision with a rectangle!");
-        // }
+            // Apply the throwing effect
+            const throwDistance = -15; // Adjust this value to control the throw distance
+            const throwHeight = 5; // Adjust this value to control the throw height
+            const throwVector = direction.clone().multiplyScalar(throwDistance);
+            throwVector.y += throwHeight;
+            playerVelocity.add(throwVector);
+        }
 
     }
 
     if ( result2 )  playerCollider.translate( result2.normal.multiplyScalar( result2.depth ) );
 }
 
-// function getPlayerDirection(objectCollider, playerCollider) {
-//     const carCenter = objectCollider.getCenter(new THREE.Vector3());
-//     const playerCenter = playerCollider.getCenter(new THREE.Vector3());
+function getPlayerDirection(objectCollider, playerCollider) {
+    const carCenter = objectCollider.getCenter(new THREE.Vector3());
+    const playerCenter = playerCollider.getCenter(new THREE.Vector3());
   
-//     return carCenter.sub(playerCenter).normalize();
-// }
+    return carCenter.sub(playerCenter).normalize();
+}
 
+let automaticRiding = false;
 let ridingCar = false;
 let ridingTimer = 0;
 
@@ -157,14 +155,18 @@ function updatePlayer( deltaTime ) {
 
     if(!ridingCar) camera.position.copy( playerCollider.end );
 
-    if(ridingTimer != 0) {
+    if (ridingTimer != 0) {
         ridingTimer++;
-        if(ridingTimer == 100){
-            ridingTimer = 0
-        }
+        if (ridingTimer == 100) ridingTimer = 0;
     }
     
-    if((keyStates[ 'KeyF' ] || keyStates[ 'Space' ]) && ridingCar && ridingTimer == 0){
+    // Automatic Riding
+    if (keyStates[ 'KeyT' ] && ridingTimer == 0) {
+        automaticRiding = !automaticRiding;
+        ridingTimer++;
+    }
+
+    if ((keyStates[ 'KeyF' ] || keyStates[ 'Space' ]) && ridingCar && ridingTimer == 0){
         teleportPlayerToRightSide(car, 2)
 
         carOctree = new Octree();
@@ -812,7 +814,9 @@ function animate(){
     //OBJECT ANIMATE==========================================================
     const t = frameCount;
 
-    if(ridingCar){
+    console.log(automaticRiding);
+
+    if(ridingCar || automaticRiding) {        
         // Animasi Posisi Object
         // car.collider.center.copy(car.position)
         car.position.lerp(targetPositions[targetIndex], t);
